@@ -31,7 +31,7 @@ services:
     volumes:
       - ../.:/app
       - storage:/upload
-      - ../resources/log:/log
+      - ./tmp/log:/log
     networks:
       - network
     working_dir: /app/vesta/server

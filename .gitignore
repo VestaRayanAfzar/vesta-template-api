@@ -6,4 +6,5 @@ npm-debug*
 tsd-debug*
 /vesta/server/*
 !/vesta/server/docker-compose.yml
+/vesta/tmp
 yarn-error*
