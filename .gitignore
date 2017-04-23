@@ -1,0 +1,9 @@
+.idea
+/node_modules
+npm-debug*
+/resources/tsd
+/resources/log
+tsd-debug*
+/vesta/server/*
+!/vesta/server/docker-compose.yml
+yarn-error*

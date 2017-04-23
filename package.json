@@ -1,0 +1,52 @@
+{
+  "name": "vesta-template-api",
+  "version": "0.1.0",
+  "description": "Vesta boilerplate for applications backend",
+  "license": "Apache-2.0",
+  "author": "hbtb <bishehsary@gmail.com>",
+  "contributors": [
+    {
+      "name": "Mohammd Javad Khalilian",
+      "email": "khalilian.javad@gmail.com"
+    }
+  ],
+  "scripts": {
+    "dev:api": "gulp dev:api",
+    "serve": "gulp api:server"
+  },
+  "repository": "https://github.com/VestaRayanAfzar/vesta-template-api.git",
+  "bugs": {
+    "url": "https://github.com/VestaRayanAfzar/vesta-template-api/issues",
+    "email": "bishehsary@gmail.com"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "formidable": "^1.0.17",
+    "helmet": "^3.3.0",
+    "jsonwebtoken": "^7.2.1",
+    "mkdirp": "^0.5.1",
+    "morgan": "^1.7.0",
+    "node-uuid": "^1.4.7",
+    "vesta-driver-mysql": "^0.4.11",
+    "vesta-driver-redis": "^0.2.8",
+    "vesta-lib": "^0.1.3"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.16.3",
+    "@types/express": "^4.0.35",
+    "@types/formidable": "^1.0.29",
+    "@types/jsonwebtoken": "^7.2.0",
+    "@types/node": "^7.0.13",
+    "fs-extra": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-develop-server": "^0.5.2",
+    "gulp-sourcemaps": "^1.9.1",
+    "gulp-typescript": "^3.1.3",
+    "jasmine-core": "^2.5.2",
+    "jasmine-node": "^1.14.5",
+    "request": "^2.79.0",
+    "typescript": "^2.1.4"
+  }
+}
