@@ -19,14 +19,14 @@ interface IResourceList {
     [name: string]: Array<string>;
 }
 
-export enum AclScope{Model = 1, Entity, Field}
+export const enum AclScope{Model = 1, Entity, Field}
 /**
  * Private (Read mine, Write mine)
  * Shared (Read all, Write mine)
  * ReadOnly (Read all, Write none)
  * Public (Read aa, Write all)
  */
-export enum AclAccessType {Private = 1, Shared, ReadOnly, Public}
+export const enum AclAccessType {Private = 1, Shared, ReadOnly, Public}
 
 export class Acl {
     /** This is the universal collection of ll Permissions */

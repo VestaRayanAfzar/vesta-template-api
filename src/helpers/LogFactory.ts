@@ -3,7 +3,7 @@ import {Logger} from "./Logger";
 import {ILogSetting} from "../config/setting";
 import {ILogger} from "../cmn/interface/ILogger";
 
-export enum LogStorage  {Console = 1, File}
+export const enum LogStorage  {Console = 1, File}
 
 export class LogFactory {
     static setting: ILogSetting;
