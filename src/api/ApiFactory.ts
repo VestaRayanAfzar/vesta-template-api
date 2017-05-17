@@ -1,8 +1,8 @@
 import {IServerAppSetting} from "../config/setting";
 import {Acl} from "../helpers/Acl";
-import {Database} from "vesta-lib/Database";
 import {Router} from "express";
 import {exporter} from "./v1/import";
+import {Database} from "@vesta/core";
 
 export class ApiFactory {
 

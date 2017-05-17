@@ -1,7 +1,7 @@
 import * as fs from "fs";
-import {IDatabaseConfig} from "vesta-lib/Database";
 import {LogStorage} from "../helpers/LogFactory";
 import {LogLevel} from "../cmn/enum/Log";
+import {IDatabaseConfig} from "@vesta/core";
 
 export interface IAdminSetting {
     logLevel: number;

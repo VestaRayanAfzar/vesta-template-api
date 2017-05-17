@@ -3,9 +3,9 @@ import * as path from "path";
 import * as formidable from "formidable";
 import {Files} from "formidable";
 import {setting} from "../config/setting";
-import {Err} from "vesta-lib/Err";
 import {Hashing} from "./Hashing";
 import {IExtRequest} from "../api/BaseController";
+import {Err} from "@vesta/core";
 let mkdirp = require('mkdirp');
 
 export class FileUploader<T> {

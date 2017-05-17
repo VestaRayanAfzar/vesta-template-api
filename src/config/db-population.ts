@@ -6,7 +6,7 @@ import {setting} from "./setting";
 import {Hashing} from "../helpers/Hashing";
 
 export function populate() {
-    let rootPromise = Permission.findByModelValues({resource: '*', action: '*'})
+    let rootPromise = Permission.find({resource: '*', action: '*'})
         .then(result => {
             return (new Role({
                 name: setting.security.rootRoleName,
@@ -30,8 +30,8 @@ export function populate() {
         });
 
     let guest = [];
-    guest.push(Permission.findByModelValues({resource: 'account', action: 'login'}));
-    guest.push(Permission.findByModelValues({resource: 'account', action: 'register'}));
+    guest.push(Permission.find({resource: 'account', action: 'login'}));
+    guest.push(Permission.find({resource: 'account', action: 'register'}));
     let guestPromise = Promise.all(guest)
         .then(data => {
             return (new Role({

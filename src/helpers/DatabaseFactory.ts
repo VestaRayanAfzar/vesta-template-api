@@ -1,7 +1,5 @@
-import {Database, IDatabaseConfig, IDatabase, IModelCollection} from "vesta-lib/Database";
-import {Err} from "vesta-lib/Err";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
 
+import {IDatabase, IModelCollection, Database, IDatabaseConfig, DatabaseError, Err} from "@vesta/core";
 export class DatabaseFactory {
     private static databases: {
         [protocol: string]: {
@@ -29,7 +27,7 @@ export class DatabaseFactory {
                 })
             }
         } else {
-            return Promise.reject(new DatabaseError(Err.Code.DBInvalidDriver, null));
+            return Promise.reject(new DatabaseError(Err.Code.DBInvalidDriver,new Error('invalid driver')));
         }
     }
 

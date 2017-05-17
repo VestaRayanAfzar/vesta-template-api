@@ -1,11 +1,10 @@
 import * as uuid from "node-uuid";
-import {Database} from "vesta-lib/Database";
 import {ISessionSetting} from "../config/setting";
-import {DatabaseFactory} from "../helpers/DatabaseFactory";
-import {Redis} from "vesta-driver-redis";
 import {Logger} from "../helpers/Logger";
 import {JWT} from "../helpers/JWT";
 import {Response} from "express";
+import {KeyValueDatabase} from "@vesta/core";
+import {Redis} from "@vesta/driver-redis";
 
 export interface ISessionData {
     payload: any;
@@ -18,7 +17,7 @@ export interface ISessionData {
 
 export class Session {
     private static setting: ISessionSetting;
-    private static db: Database;
+    private static db: KeyValueDatabase;
     public sessionId: string;
     public isExpired = false;
     public sessionData: ISessionData;
@@ -50,8 +49,7 @@ export class Session {
 
     public static init(setting: ISessionSetting) {
         Session.setting = setting;
-        DatabaseFactory.register('sesDatabase', Session.setting.database, Redis);
-        return DatabaseFactory.getInstance('sesDatabase')
+        return new Redis(Session.setting.database).connect()
             .then(connection => {
                 Session.db = connection;
             })
@@ -59,33 +57,33 @@ export class Session {
 
     public set(name: string, value: any) {
         this.sessionData.payload[name] = value;
-        Session.db.insertOne(this.sessionId, JSON.stringify(this.sessionData));
+        Session.db.insert(this.sessionId, JSON.stringify(this.sessionData)).catch(err => console.log(err.message));
     }
 
     public get<T>(name: string) {
-        return <T>this.sessionData.payload[name];
+        return this.sessionData.payload ? <T>this.sessionData.payload[name] : null;
     }
 
     public remove(name: string) {
         let value = this.sessionData.payload[name];
         delete this.sessionData.payload[name];
-        Session.db.insertOne(this.sessionId, JSON.stringify(this.sessionData));
+        Session.db.insert(this.sessionId, JSON.stringify(this.sessionData)).catch(err => console.log(err.message));
         return value;
     }
 
     public destroy() {
         this.sessionData = <ISessionData>{};
-        Session.db.insertOne(this.sessionId, '');
+        Session.db.insert(this.sessionId, '').catch(err => console.log(err.message));
     }
 
     public static create(persist?: boolean): Promise<Session> {
         let session = new Session(null, persist);
-        return Session.db.insertOne(session.sessionId, JSON.stringify(session.sessionData))
+        return Session.db.insert(session.sessionId, JSON.stringify(session.sessionData))
             .then(() => session);
     }
 
     public static restore(sessionId: string): Promise<Session> {
-        return Session.db.findById<ISessionData>(sessionId, null)
+        return Session.db.find<ISessionData>(sessionId)
             .then(data => {
                 if (data.items.length) {
                     let session = new Session(data.items[0]);

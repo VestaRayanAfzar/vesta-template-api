@@ -1,10 +1,7 @@
 import {Response, Router, NextFunction} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "vesta-lib/Err";
-import {ValidationError} from "vesta-lib/error/ValidationError";
 import {Permission, IPermission} from "../../../cmn/models/Permission";
-import {Vql} from "vesta-lib/Vql";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
+import {Vql, ValidationError, DatabaseError, Err} from "@vesta/core";
 
 
 export class PermissionController extends BaseController {
@@ -19,7 +16,7 @@ export class PermissionController extends BaseController {
     }
 
     public getPermission(req: IExtRequest, res: Response, next: NextFunction) {
-        Permission.findById<IPermission>(req.params.id)
+        Permission.find<IPermission>(req.params.id)
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -35,7 +32,7 @@ export class PermissionController extends BaseController {
             }
             query.filter(filter);
         }
-        Permission.findByQuery(query)
+        Permission.find(query)
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -46,7 +43,7 @@ export class PermissionController extends BaseController {
         if (validationError) {
             return next(new ValidationError(validationError));
         }
-        Permission.findById<IPermission>(permission.id)
+        Permission.find<IPermission>(permission.id)
             .then(result => {
                 if (result.items.length == 1) {
                     result.items[0].status = permission.status;

@@ -55,6 +55,25 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
+"@vesta/core@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@vesta/core/-/core-0.2.0.tgz#b9da4058c0227adbb198c660ef7e23e26078c028"
+
+"@vesta/driver-mysql@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@vesta/driver-mysql/-/driver-mysql-0.1.0.tgz#d45a5a81995b48bd7b28f8e47b542fbefe644201"
+  dependencies:
+    "@types/mysql" "^0.0.32"
+    "@vesta/core" "^0.2.0"
+    mysql "^2.11.1"
+
+"@vesta/driver-redis@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@vesta/driver-redis/-/driver-redis-0.1.0.tgz#39c40e42752d797af011b17306c0f36f7945328b"
+  dependencies:
+    redis "^2.5.3"
+    vesta-lib "^0.3.0-beta.4"
+
 accepts@~1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.3.tgz#c3ca7434938648c3e0d9c1e328dd68b622c284ca"
@@ -1903,24 +1922,9 @@ verror@1.3.6:
   dependencies:
     extsprintf "1.0.2"
 
-vesta-driver-mysql@^0.4.11:
-  version "0.4.11"
-  resolved "https://registry.yarnpkg.com/vesta-driver-mysql/-/vesta-driver-mysql-0.4.11.tgz#c5d12ef06942057f4ae5615702a7e21901f21d57"
-  dependencies:
-    "@types/mysql" "^0.0.32"
-    mysql "^2.11.1"
-    vesta-lib "^0.1.3"
-
-vesta-driver-redis@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/vesta-driver-redis/-/vesta-driver-redis-0.2.8.tgz#b108fd19b494c84b3db0f7fa04858f734115694e"
-  dependencies:
-    redis "^2.5.3"
-    vesta-lib "^0.1.3"
-
-vesta-lib@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/vesta-lib/-/vesta-lib-0.1.3.tgz#36db2f4b83255833d967b4652eb7b19d21df9715"
+vesta-lib@^0.3.0-beta.4:
+  version "0.3.0-beta.5"
+  resolved "https://registry.yarnpkg.com/vesta-lib/-/vesta-lib-0.3.0-beta.5.tgz#cb571ea62e7de1759ef498fd542cad3f6019be27"
 
 vinyl-fs@^0.3.0:
   version "0.3.14"

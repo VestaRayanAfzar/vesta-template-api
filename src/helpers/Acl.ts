@@ -1,11 +1,10 @@
 import {IRole, Role} from "../cmn/models/Role";
 import {IPermission, Permission} from "../cmn/models/Permission";
 import {IRoleGroup, RoleGroup} from "../cmn/models/RoleGroup";
-import {Vql} from "vesta-lib/Vql";
 import {populate} from "../config/db-population";
-import {HLCondition} from "vesta-lib/Condition";
 import {IServerAppSetting} from "../config/setting";
 import {AclPolicy} from "../cmn/enum/Acl";
+import {Vql, HLCondition} from "@vesta/core";
 
 export interface IGroupsList {
     [group: string]: Array<IRole>
@@ -130,7 +129,7 @@ export class Acl {
      * dbResource, dbPermissions, dbAction      These are resources that has been queried from database (Old & might be Invalid)
      */
     public initAcl() {
-        return Permission.findByQuery<Permission>(new Vql(Permission.schema.name))
+        return Permission.find<Permission>(new Vql(Permission.schema.name))
             .then(result => {
                 let updateOperations = [];
                 // Finding new permissions to be added to database
@@ -155,7 +154,7 @@ export class Acl {
                     }
                 }
                 if (newPermissions.length) {
-                    updateOperations.push(Permission.insertAll(newPermissions));
+                    updateOperations.push(Permission.insert(newPermissions));
                 }
                 // Finding deprecated permissions to be deleted from database
                 let deprecatedPermissions = [];
@@ -171,7 +170,7 @@ export class Acl {
                     for (let i = deprecatedPermissions.length; i--;) {
                         conditions.push(HLCondition.eq('id', deprecatedPermissions[i]));
                     }
-                    updateOperations.push(Permission.deleteAll(HLCondition.or(...conditions)));
+                    updateOperations.push(Permission.remove(HLCondition.or(...conditions)));
                 }
                 // todo is there a case in which no update occurred but populate function needs to be called ???
                 if (updateOperations.length) {
@@ -188,11 +187,10 @@ export class Acl {
     private loadRoleGroups() {
         let roleQuery = new Vql(Role.schema.name);
         roleQuery.fetchRecordFor('permissions');
-        let rolePromise = Role.findByQuery<IRole>(roleQuery);
+        let rolePromise = Role.find<IRole>(roleQuery).then(result => result.items);
         let groupQuery = new Vql(RoleGroup.schema.name);
         groupQuery.fetchRecordFor('roles');
-        let groupPromise = RoleGroup.findByQuery<IRoleGroup>(groupQuery);
-
+        let groupPromise = RoleGroup.find<IRoleGroup>(groupQuery).then(result => result.items);
         return Promise.all([rolePromise, groupPromise]).then(data => {
             this.update(<Array<IRole>>data[0], <Array<IRoleGroup>>data[1]);
         })

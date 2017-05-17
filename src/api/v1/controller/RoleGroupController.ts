@@ -1,11 +1,8 @@
 import {Response, Router, NextFunction} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "vesta-lib/Err";
-import {ValidationError} from "vesta-lib/error/ValidationError";
 import {RoleGroup, IRoleGroup} from "../../../cmn/models/RoleGroup";
-import {Vql} from "vesta-lib/Vql";
 import {Permission} from "../../../cmn/models/Permission";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
+import {Vql, ValidationError, DatabaseError, Err} from "@vesta/core";
 
 
 export class RoleGroupController extends BaseController {
@@ -22,7 +19,7 @@ export class RoleGroupController extends BaseController {
     }
 
     public getRoleGroup(req: IExtRequest, res: Response, next: NextFunction) {
-        RoleGroup.findById<IRoleGroup>(req.params.id, {relations: ['roles']})
+        RoleGroup.find<IRoleGroup>(req.params.id, {relations: ['roles']})
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -38,7 +35,7 @@ export class RoleGroupController extends BaseController {
             }
             query.filter(filter);
         }
-        RoleGroup.findByQuery(query)
+        RoleGroup.find(query)
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -60,7 +57,7 @@ export class RoleGroupController extends BaseController {
         if (validationError) {
             return next(new ValidationError(validationError));
         }
-        RoleGroup.findById<IRoleGroup>(roleGroup.id)
+        RoleGroup.find<IRoleGroup>(roleGroup.id)
             .then(result => {
                 if (result.items.length == 1) {
                     return roleGroup.update()
@@ -76,7 +73,7 @@ export class RoleGroupController extends BaseController {
 
     public removeRoleGroup(req: IExtRequest, res: Response, next: NextFunction) {
         let roleGroup = new RoleGroup({id: req.params.id});
-        roleGroup.delete()
+        roleGroup.remove()
             .then(result => {
                 result.items.length && this.acl.initAcl();
                 res.json(result);

@@ -1,11 +1,8 @@
 import {Response, Router, NextFunction} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "vesta-lib/Err";
-import {ValidationError} from "vesta-lib/error/ValidationError";
 import {Role, IRole} from "../../../cmn/models/Role";
-import {Vql} from "vesta-lib/Vql";
 import {Permission} from "../../../cmn/models/Permission";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
+import {ValidationError, Vql, DatabaseError, Err} from "@vesta/core";
 
 
 export class RoleController extends BaseController {
@@ -22,7 +19,7 @@ export class RoleController extends BaseController {
     }
 
     public getRole(req: IExtRequest, res: Response, next: NextFunction) {
-        Role.findById<IRole>(req.params.id, {relations: ['permissions']})
+        Role.find<IRole>(req.params.id, {relations: ['permissions']})
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -38,7 +35,7 @@ export class RoleController extends BaseController {
             }
             query.filter(filter);
         }
-        Role.findByQuery(query)
+        Role.find(query)
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -60,7 +57,7 @@ export class RoleController extends BaseController {
         if (validationError) {
             return next(new ValidationError(validationError));
         }
-        Role.findById<IRole>(role.id)
+        Role.find<IRole>(role.id)
             .then(result => {
                 if (result.items.length == 1) {
                     return role.update()
@@ -76,7 +73,7 @@ export class RoleController extends BaseController {
 
     public removeRole(req: IExtRequest, res: Response, next: NextFunction) {
         let role = new Role({id: +req.params.id});
-        return role.delete()
+        return role.remove()
             .then(result => {
                 result.items.length && this.acl.initAcl();
                 res.json(result);

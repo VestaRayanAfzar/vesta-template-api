@@ -20,6 +20,9 @@
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
+    "@vesta/core": "^0.2.0",
+    "@vesta/driver-mysql": "^0.1.0",
+    "@vesta/driver-redis": "^0.1.0",
     "body-parser": "^1.15.2",
     "cors": "^2.8.1",
     "express": "^4.14.0",
@@ -28,10 +31,7 @@
     "jsonwebtoken": "^7.2.1",
     "mkdirp": "^0.5.1",
     "morgan": "^1.7.0",
-    "node-uuid": "^1.4.7",
-    "vesta-driver-mysql": "^0.4.11",
-    "vesta-driver-redis": "^0.2.8",
-    "vesta-lib": "^0.1.3"
+    "node-uuid": "^1.4.7"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.3",

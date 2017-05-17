@@ -1,15 +1,12 @@
 import {Response, Router, NextFunction} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "vesta-lib/Err";
-import {ValidationError} from "vesta-lib/error/ValidationError";
 import {User, IUser} from "../../../cmn/models/User";
-import {IQueryResult} from "vesta-lib/ICRUDResult";
 import {Session} from "../../../session/Session";
 import {RoleGroup, IRoleGroup} from "../../../cmn/models/RoleGroup";
 import {Hashing} from "../../../helpers/Hashing";
 import {Permission} from "../../../cmn/models/Permission";
 import {Status} from "../../../cmn/enum/Status";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
+import {ValidationError, DatabaseError, Err, IQueryResult} from "@vesta/core";
 
 
 export class AccountController extends BaseController {
@@ -66,7 +63,7 @@ export class AccountController extends BaseController {
             return next(new ValidationError(validationError))
         }
         user.password = Hashing.withSalt(user.password);
-        User.findByModelValues<IUser>({username: user.username, password: user.password}, {
+        User.find<IUser>({username: user.username, password: user.password}, {
             relations: [{
                 name: 'roleGroups',
                 fields: ['id', 'name', 'status']
@@ -92,7 +89,7 @@ export class AccountController extends BaseController {
     }
 
     public logout(req: IExtRequest, res: Response, next: NextFunction) {
-        User.findById<IUser>(this.user(req).id)
+        User.find<IUser>(this.user(req).id)
             .then(result => {
                 if (result.items.length != 1) throw new DatabaseError(Err.Code.DBNoRecord, null);
                 req.session && req.session.destroy();
@@ -108,7 +105,7 @@ export class AccountController extends BaseController {
     public getMe(req: IExtRequest, res: Response, next: NextFunction) {
         let user = this.user(req);
         if (user.id) {
-            User.findById<IUser>(user.id, {relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]})
+            User.find<IUser>(user.id, {relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]})
                 .then(result => {
                     result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
                     result.items[0].password = '';
@@ -135,7 +132,7 @@ export class AccountController extends BaseController {
         if (validationError) {
             return next(new ValidationError(validationError));
         }
-        User.findById<IUser>(user.id)
+        User.find<IUser>(user.id)
             .then(result => {
                 if (result.items.length == 1) return user.update<IUser>().then(result => res.json(result));
                 throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);

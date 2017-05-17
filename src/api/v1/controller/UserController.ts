@@ -1,13 +1,10 @@
 import * as path from "path";
 import {Response, Router, NextFunction} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "vesta-lib/Err";
-import {Vql} from "vesta-lib/Vql";
-import {DatabaseError} from "vesta-lib/error/DatabaseError";
-import {ValidationError} from "vesta-lib/error/ValidationError";
 import {User, IUser} from "../../../cmn/models/User";
 import {Permission} from "../../../cmn/models/Permission";
 import {FileUploader} from "../../../helpers/FileUploader";
+import {Vql, ValidationError, DatabaseError, Err} from "@vesta/core";
 
 
 export class UserController extends BaseController {
@@ -44,7 +41,7 @@ export class UserController extends BaseController {
     public getUser(req: IExtRequest, res: Response, next: NextFunction) {
         let query = new Vql(User.schema.name);
         query.filter({id: req.params.id}).fetchRecordFor('roleGroups');
-        User.findByQuery<IUser>(query)
+        User.find<IUser>(query)
             .then(result => {
                 if (result.items.length == 1) {
                 delete result.items[0].password;
@@ -72,7 +69,7 @@ export class UserController extends BaseController {
             let orderBy = req.query.orderBy[0];
             query.sortBy(orderBy.field, orderBy.ascending == 'true');
         }
-        User.findByQuery<IUser>(query)
+        User.find<IUser>(query)
             .then(result => {
                 for (let i = result.items.length; i--;) {
                     delete result.items[i].password;
@@ -99,7 +96,7 @@ export class UserController extends BaseController {
         if (validationError) {
             return next(new ValidationError(validationError));
         }
-        User.findById<IUser>(user.id)
+        User.find<IUser>(user.id)
             .then(result => {
                 if (result.items.length == 1) {
                     return user.update<IUser>()
@@ -115,7 +112,7 @@ export class UserController extends BaseController {
 
     public removeUser(req: IExtRequest, res: Response, next: NextFunction) {
         let user = new User({id: req.params.id});
-        user.delete()
+        user.remove()
             .then(result => res.json(result))
             .catch(error => next(error));
     }
@@ -123,7 +120,7 @@ export class UserController extends BaseController {
     public upload(req: IExtRequest, res: Response, next: NextFunction) {
         let user: User;
         let destDirectory = path.join(this.setting.dir.upload, 'user');
-        User.findById<IUser>(+req.params.id)
+        User.find<IUser>(+req.params.id)
             .then(result => {
                 if (result.items.length != 1) throw new Err(Err.Code.DBRecordCount, 'User not found');
                 delete result.items[0].password;
@@ -134,9 +131,11 @@ export class UserController extends BaseController {
             .then(upl => {
                 let oldFileName = user.image;
                 user.image = upl.image;
+                if (oldFileName && oldFileName != '') {
                 return FileUploader.checkAndDeleteFile(`${destDirectory}/${oldFileName}`);
+                }
             })
-            .then(() => user.update())
+            .then(() => user.update({image: user.image}))
             .then(result => res.json(result))
             .catch(reason => next(new Err(reason.error.code, reason.error.message)));
     }
