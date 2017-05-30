@@ -7,16 +7,17 @@ import {Hashing} from "../../../helpers/Hashing";
 import {Permission} from "../../../cmn/models/Permission";
 import {Status} from "../../../cmn/enum/Status";
 import {ValidationError, DatabaseError, Err, IQueryResult} from "@vesta/core";
+import {throws} from "assert";
 
 
 export class AccountController extends BaseController {
 
     public route(router: Router) {
-        router.get('/me', this.getMe.bind(this));
-        router.put('/account', this.checkAcl('account', Permission.Action.Edit), this.update.bind(this));
-        router.post('/account', this.checkAcl('account', 'register'), this.register.bind(this));
-        router.post('/account/login', this.checkAcl('account', 'login'), this.login.bind(this));
-        router.get('/account/logout', this.checkAcl('account', 'logout'), this.logout.bind(this));
+        router.get('/me', this.wrap(this.getMe));
+        router.put('/account', this.checkAcl('account', Permission.Action.Edit), this.wrap(this.update));
+        router.post('/account', this.checkAcl('account', 'register'), this.wrap(this.register));
+        router.post('/account/login', this.checkAcl('account', 'login'), this.wrap(this.login));
+        router.get('/account/logout', this.checkAcl('account', 'logout'), this.wrap(this.logout));
     }
 
     protected init() {
@@ -33,85 +34,64 @@ export class AccountController extends BaseController {
         return roleGroups;
     }
 
-    public register(req: IExtRequest, res: Response, next: NextFunction) {
+    public async register(req: IExtRequest, res: Response, next: NextFunction) {
         let user = new User(req.body),
             validationError = user.validate();
         if (validationError) {
             return next(new ValidationError(validationError));
         }
         user.password = Hashing.withSalt(user.password);
-        user.insert<IUser>()
-            .then(result => {
-                result.items[0].password = '';
-                user.setValues(result.items[0]);
-                req.session && req.session.destroy();
-                Session.create()
-                    .then(session => {
-                        Session.setAuthToken(res, session.sessionId);
-                        req.session = session;
-                        req.session.set('user', user.getValues());
-                        res.json(result);
-                    })
-            })
-            .catch(error => next(error));
+        let result = await user.insert<IUser>();
+        result.items[0].password = '';
+        user.setValues(result.items[0]);
+        req.session && req.session.destroy();
+        let session = await Session.create();
+        Session.setAuthToken(res, session.sessionId);
+        req.session = session;
+        req.session.set('user', user.getValues());
+        res.json(result);
     }
 
-    public login(req: IExtRequest, res: Response, next: NextFunction) {
+    public async login(req: IExtRequest, res: Response, next: NextFunction) {
         let user = new User(req.body),
             validationError = user.validate('username', 'password');
         if (validationError) {
-            return next(new ValidationError(validationError))
+            throw new ValidationError(validationError)
         }
         user.password = Hashing.withSalt(user.password);
-        User.find<IUser>({username: user.username, password: user.password}, {
-            relations: [{
-                name: 'roleGroups',
-                fields: ['id', 'name', 'status']
-            }]
-        })
-            .then(result => {
-                if (result.items.length != 1) {
-                    return next(new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null));
-                }
-                result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
-                result.items[0].password = '';
-                user.setValues(result.items[0]);
-                req.session && req.session.destroy();
-                Session.create(req.body.rememberMe)
-                    .then(session => {
-                        Session.setAuthToken(res, session.sessionId);
-                        req.session = session;
-                        req.session.set('user', user.getValues());
-                        res.json(result);
-                    })
-            })
-            .catch(error => next(error));
+        let result = await User.find<IUser>({username: user.username, password: user.password}, {
+            relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]
+        });
+        if (result.items.length != 1) {
+            throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
+        }
+        result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
+        result.items[0].password = '';
+        user.setValues(result.items[0]);
+        req.session && req.session.destroy();
+        let session = await Session.create(req.body.rememberMe);
+        Session.setAuthToken(res, session.sessionId);
+        req.session = session;
+        req.session.set('user', user.getValues());
+        res.json(result);
     }
 
-    public logout(req: IExtRequest, res: Response, next: NextFunction) {
-        User.find<IUser>(this.user(req).id)
-            .then(result => {
-                if (result.items.length != 1) throw new DatabaseError(Err.Code.DBNoRecord, null);
-                req.session && req.session.destroy();
-                return Session.create()
-            })
-            .then(session => {
-                Session.setAuthToken(res, session.sessionId);
-                this.getMe(req, res, next);
-            })
-            .catch(error => next(error));
+    public async logout(req: IExtRequest, res: Response, next: NextFunction) {
+        let result = await User.find<IUser>(this.user(req).id);
+        if (result.items.length != 1) throw new DatabaseError(Err.Code.DBNoRecord, null);
+        req.session && req.session.destroy();
+        let session = await Session.create();
+        Session.setAuthToken(res, session.sessionId);
+        await this.getMe(req, res, next);
     }
 
-    public getMe(req: IExtRequest, res: Response, next: NextFunction) {
+    public async getMe(req: IExtRequest, res: Response, next: NextFunction) {
         let user = this.user(req);
         if (user.id) {
-            User.find<IUser>(user.id, {relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]})
-                .then(result => {
-                    result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
-                    result.items[0].password = '';
-                    res.json(result);
-                })
-                .catch(error => next(error));
+            let result = await User.find<IUser>(user.id, {relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]});
+            result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
+            result.items[0].password = '';
+            res.json(result);
         } else {
             let securitySetting = this.setting.security;
             let guest = <IUser>{
@@ -125,18 +105,12 @@ export class AccountController extends BaseController {
         }
     }
 
-    public update(req: IExtRequest, res: Response, next: NextFunction) {
-        let user = new User(req.body),
-            validationError = user.validate();
+    public async update(req: IExtRequest, res: Response, next: NextFunction) {
+        let user = new User(req.body), validationError = user.validate();
         user.id = this.user(req).id;
-        if (validationError) {
-            return next(new ValidationError(validationError));
-        }
-        User.find<IUser>(user.id)
-            .then(result => {
-                if (result.items.length == 1) return user.update<IUser>().then(result => res.json(result));
-                throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
-            })
-            .catch(error => next(error));
+        if (validationError) throw new ValidationError(validationError);
+        let result = await User.find<IUser>(user.id);
+        if (result.items.length != 1) throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
+        user.update<IUser>().then(result => res.json(result));
     }
 }

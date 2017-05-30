@@ -34,10 +34,12 @@ export interface ISecuritySetting {
 export interface IServerAppSetting {
     env: string;
     log: ILogSetting;
-    version: {app: string; api: string};
+    version: { app: string; api: string };
     regenerateSchema: boolean;
     database: IDatabaseConfig;
     port: number;
+    http2: boolean;
+    ssl?: { key: string, cert: string }
     dir: {
         upload: string;
         html: string;
@@ -72,6 +74,11 @@ export const setting: IServerAppSetting = {
         api: 'v1'
     },
     regenerateSchema: true,
+    http2: true,
+    ssl: {
+        key: '/ssl/server.key',
+        cert: '/ssl/server.crt'
+    },
     database: <IDatabaseConfig>{
         protocol: env.ADB_PROTOCOL,
         host: env.ADB_HOST,

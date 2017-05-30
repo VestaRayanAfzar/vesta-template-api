@@ -13,23 +13,36 @@ import {loggerMiddleware} from "./middlewares/logger";
 import {LogFactory, LogStorage} from "./helpers/LogFactory";
 import {Session} from "./session/Session";
 import {AclPolicy} from "./cmn/enum/Acl";
-import {Database, Err, IModelCollection} from "@vesta/core";
+import {Database, Err, IModelCollection, KeyValueDatabase} from "@vesta/core";
 import {MySQL} from "@vesta/driver-mysql";
+import * as spdy from "spdy"
 let cors = require('cors');
 let helmet = require('helmet');
 
+const options = {
+    key: fs.readFileSync('/ssl/server.key'),
+    cert: fs.readFileSync('/ssl/server.crt')
+};
+
 export class ServerApp {
-    private app: express.Express;
-    private server: http.Server;
-    private sessionDatabase: Database;
+    private app: express.Express
+    private server: spdy.Server | http.Server;
+    private sessionDatabase: KeyValueDatabase;
     private database: Database;
     private acl: Acl;
 
     constructor(private setting: IServerAppSetting) {
         this.app = express();
-        this.server = http.createServer(this.app);
+        if (setting.http2) {
+            const options = {
+                key: fs.readFileSync(setting.ssl.key),
+                cert: fs.readFileSync(setting.ssl.cert)
+            };
+            this.server = spdy.createServer(options, <any>this.app);
+        } else {
+            this.server = http.createServer(this.app);
+        }
         this.server.on('error', err => console.error(err));
-        this.server.on('listening', arg => console.log(arg));
         this.acl = new Acl(setting, AclPolicy.Deny);
         this.setting.log.storage = this.setting.env == 'development' ? LogStorage.Console : LogStorage.File;
         if (!LogFactory.init(this.setting.log)) {
@@ -58,7 +71,6 @@ export class ServerApp {
             res.set('Connection', 'Close');
             next();
         });
-
         this.app.enable('trust proxy');
         this.app.disable('case sensitive routing');
         this.app.disable('strict routing');
@@ -66,15 +78,15 @@ export class ServerApp {
         this.app.disable('etag');
     }
 
-    private initRouting(): Promise<any> {
+    private async initRouting(): Promise<any> {
         this.app.use('/upl', express.static(this.setting.dir.upload));
         this.app.use('/asset', express.static(this.setting.dir.html));
         this.app.use((req: IExtRequest, res, next) => {
             req.sessionDB = this.sessionDatabase;
             sessionMiddleware(req, res, next);
         });
-        return ApiFactory.create(this.setting, this.acl, this.database)
-            .then(routing => this.app.use('/', routing));
+        let routing = await ApiFactory.create(this.setting, this.acl, this.database);
+        return this.app.use('/', routing)
     }
 
     private initErrorHandlers() {
@@ -94,36 +106,41 @@ export class ServerApp {
         });
     }
 
-    private initDatabase(): Promise<any> {
+    private async initDatabase(): Promise<any> {
         let modelsDirectory = `${__dirname}/cmn/models`;
         let modelFiles = fs.readdirSync(modelsDirectory);
         let models: IModelCollection = {};
         // creating models list
         for (let i = modelFiles.length; i--;) {
-            let modelName = modelFiles[i].slice(0, -3);
-            let model = require(`${modelsDirectory}/${modelFiles[i]}`);
-            models[model[modelName]['schema']['name']] = model[modelName];
+            if (modelFiles[i].endsWith('.js')) {
+                let modelName = modelFiles[i].slice(0, -3);
+                let model = require(`${modelsDirectory}/${modelFiles[i]}`);
+                models[model[modelName]['schema']['name']] = model[modelName];
+            }
         }
         // registering database drivers
         DatabaseFactory.register('appDatabase', this.setting.database, MySQL, models);
         // getting application database instance
-        return DatabaseFactory.getInstance('appDatabase')
-            .then(db => this.setting.regenerateSchema ? db.init() : db)
+        let db = await DatabaseFactory.getInstance('appDatabase');
+        this.setting.regenerateSchema ? await db.init() : db
     }
 
-    public init(): Promise<any> {
+    public async init(): Promise<any> {
         this.configExpressServer();
-        return Session.init(this.setting.security.session)
-            .then(() => this.initDatabase())
-            .then(() => this.initRouting())
-            .then(() => {
-                this.initErrorHandlers();
-                return this.acl.initAcl();
-            })
+        await Session.init(this.setting.security.session);
+        await this.initDatabase();
+        await this.initRouting();
+        this.initErrorHandlers();
+        await this.acl.initAcl();
     }
 
     public start() {
-        this.server.listen(this.setting.port);
+        return new Promise((resolve, reject) => {
+            this.server.listen(this.setting.port)
+                .on('listening', arg => resolve(arg))
+                .on('error', err => resolve(err));
+        })
+
     }
 
     /**

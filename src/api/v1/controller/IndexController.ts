@@ -4,7 +4,7 @@ import {BaseController, IExtRequest} from "../../BaseController";
 export class IndexController extends BaseController {
 
     public route(router: Router): void {
-        router.get('/', this.sayHi.bind(this));
+        router.get('/', this.wrap(this.sayHi));
     }
 
     private sayHi(req: IExtRequest, res: Response, next: NextFunction) {

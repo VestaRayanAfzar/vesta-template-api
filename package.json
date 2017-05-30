@@ -20,6 +20,7 @@
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
+    "@types/spdy": "^3.4.1",
     "@vesta/core": "^0.2.0",
     "@vesta/driver-mysql": "^0.1.0",
     "@vesta/driver-redis": "^0.1.0",
@@ -31,7 +32,8 @@
     "jsonwebtoken": "^7.2.1",
     "mkdirp": "^0.5.1",
     "morgan": "^1.7.0",
-    "node-uuid": "^1.4.7"
+    "node-uuid": "^1.4.7",
+    "spdy": "^3.4.7"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.3",

@@ -5,11 +5,11 @@ import {IUser, User} from "../cmn/models/User";
 import {Acl} from "../helpers/Acl";
 import {IRole} from "../cmn/models/Role";
 import {Logger} from "../helpers/Logger";
-import {Database, Err} from "@vesta/core";
+import {Database, Err, KeyValueDatabase} from "@vesta/core";
 
 export interface IExtRequest extends Request {
     log: Logger;
-    sessionDB: Database;
+    sessionDB: KeyValueDatabase;
     session: Session;
 }
 
@@ -68,6 +68,17 @@ export abstract class BaseController {
                 }
             }
             next(new Err(Err.Code.Forbidden, 'Access to this edge is forbidden'));
+        }
+    }
+
+    protected wrap(action: (req: IExtRequest, res: Response, next: NextFunction) => any) {
+        action = action.bind(this);
+        return async (req, res, next) => {
+            try {
+                await action(req, res, next)
+            } catch (error) {
+                next(error)
+            }
         }
     }
 }

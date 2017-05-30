@@ -30,6 +30,7 @@ services:
       - '5858:5858'
     volumes:
       - ../.:/app
+      - ../resources/docker/ssl:/ssl
       - storage:/upload
       - ./tmp/log:/log
     networks:

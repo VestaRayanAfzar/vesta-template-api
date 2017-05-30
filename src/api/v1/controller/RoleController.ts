@@ -8,76 +8,66 @@ import {ValidationError, Vql, DatabaseError, Err} from "@vesta/core";
 export class RoleController extends BaseController {
 
     public route(router: Router) {
-        router.get('/acl/role/:id', this.checkAcl('acl.role', Permission.Action.Read), this.getRole.bind(this));
-        router.get('/acl/role', this.checkAcl('acl.role', Permission.Action.Read), this.getRoles.bind(this));
-        router.post('/acl/role', this.checkAcl('acl.role', Permission.Action.Add), this.addRole.bind(this));
-        router.put('/acl/role', this.checkAcl('acl.role', Permission.Action.Edit), this.updateRole.bind(this));
-        router.delete('/acl/role/:id', this.checkAcl('acl.role', Permission.Action.Delete), this.removeRole.bind(this));
+        router.get('/acl/role/:id', this.checkAcl('acl.role', Permission.Action.Read), this.wrap(this.getRole));
+        router.get('/acl/role', this.checkAcl('acl.role', Permission.Action.Read), this.wrap(this.getRoles));
+        router.post('/acl/role', this.checkAcl('acl.role', Permission.Action.Add), this.wrap(this.addRole));
+        router.put('/acl/role', this.checkAcl('acl.role', Permission.Action.Edit), this.wrap(this.updateRole));
+        router.delete('/acl/role/:id', this.checkAcl('acl.role', Permission.Action.Delete), this.wrap(this.removeRole));
     }
 
     protected init() {
     }
 
-    public getRole(req: IExtRequest, res: Response, next: NextFunction) {
-        Role.find<IRole>(req.params.id, {relations: ['permissions']})
-            .then(result => res.json(result))
-            .catch(error => next(error));
+    public async getRole(req: IExtRequest, res: Response, next: NextFunction) {
+        let result = await Role.find<IRole>(req.params.id, {relations: ['permissions']});
+        res.json(result)
     }
 
-    public getRoles(req: IExtRequest, res: Response, next: NextFunction) {
+    public async getRoles(req: IExtRequest, res: Response, next: NextFunction) {
         let query = new Vql(Role.schema.name);
         let filter = req.query.query;
         if (filter) {
             let role = new Role(filter);
             let validationError = query && role.validate(...Object.keys(filter));
             if (validationError) {
-                return next(new ValidationError(validationError))
+                throw new ValidationError(validationError)
             }
             query.filter(filter);
         }
-        Role.find(query)
-            .then(result => res.json(result))
-            .catch(error => next(error));
+        let result = await Role.find(query);
+        res.json(result)
     }
 
-    public addRole(req: IExtRequest, res: Response, next: NextFunction) {
+    public async addRole(req: IExtRequest, res: Response, next: NextFunction) {
         let role = new Role(req.body),
             validationError = role.validate();
         if (validationError) {
-            return next(new ValidationError(validationError));
+            throw new ValidationError(validationError);
         }
-        role.insert<IRole>()
-            .then(result => res.json(result))
-            .catch(error => next(error));
+        let result = role.insert<IRole>();
+        res.json(result)
     }
 
-    public updateRole(req: IExtRequest, res: Response, next: NextFunction) {
+    public async updateRole(req: IExtRequest, res: Response, next: NextFunction) {
         let role = new Role(req.body),
             validationError = role.validate();
         if (validationError) {
-            return next(new ValidationError(validationError));
+            throw new ValidationError(validationError);
         }
-        Role.find<IRole>(role.id)
-            .then(result => {
-                if (result.items.length == 1) {
-                    return role.update()
-                        .then(result => {
-                            this.acl.initAcl();
-                            res.json(result);
-                        });
-                }
-                throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
-            })
-            .catch(error => next(error));
+        let result = await Role.find<IRole>(role.id);
+        if (result.items.length == 1) {
+            let rResult = await role.update();
+            await this.acl.initAcl();
+            res.json(rResult);
+        } else {
+            throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
+        }
     }
 
-    public removeRole(req: IExtRequest, res: Response, next: NextFunction) {
+    public async removeRole(req: IExtRequest, res: Response, next: NextFunction) {
         let role = new Role({id: +req.params.id});
-        return role.remove()
-            .then(result => {
-                result.items.length && this.acl.initAcl();
-                res.json(result);
-            })
-            .catch(error => next(error));
+        let result = await role.remove();
+        result.items.length && this.acl.initAcl();
+        res.json(result);
     }
 }
