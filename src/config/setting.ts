@@ -38,7 +38,7 @@ export interface IServerAppSetting {
     regenerateSchema: boolean;
     database: IDatabaseConfig;
     port: number;
-    http2: boolean;
+    http2?: boolean;
     ssl?: { key: string, cert: string }
     dir: {
         upload: string;

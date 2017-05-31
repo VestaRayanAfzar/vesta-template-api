@@ -19,11 +19,6 @@ import * as spdy from "spdy"
 let cors = require('cors');
 let helmet = require('helmet');
 
-const options = {
-    key: fs.readFileSync('/ssl/server.key'),
-    cert: fs.readFileSync('/ssl/server.crt')
-};
-
 export class ServerApp {
     private app: express.Express
     private server: spdy.Server | http.Server;
