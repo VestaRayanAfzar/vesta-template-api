@@ -16,7 +16,7 @@
       "name": "expressJsTemplate",
       "common": "commonJsTemplate"
     },
-    "type": "serverSide",
+    "type": "ApiServer",
     "endpoint": "http://localhost:3000"
   }
 }
