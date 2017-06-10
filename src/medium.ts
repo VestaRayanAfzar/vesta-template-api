@@ -1,3 +1,4 @@
+export {File} from "formidable"
 export {
     IComparison,
     ITraverseCallback,
