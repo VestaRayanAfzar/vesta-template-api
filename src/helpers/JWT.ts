@@ -1,8 +1,8 @@
-import {setting} from "../config/setting";
+import {config} from "../config/config";
 import * as jwt from "jsonwebtoken";
 import {SignOptions, VerifyOptions, VerifyCallback} from "jsonwebtoken";
 
-let security = setting.security;
+let security = config.security;
 
 export class JWT {
 

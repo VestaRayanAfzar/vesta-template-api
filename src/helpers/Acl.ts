@@ -2,9 +2,9 @@ import {IRole, Role} from "../cmn/models/Role";
 import {IPermission, Permission} from "../cmn/models/Permission";
 import {IRoleGroup, RoleGroup} from "../cmn/models/RoleGroup";
 import {populate} from "../config/db-population";
-import {IServerAppSetting} from "../config/setting";
+import {IServerAppConfig} from "../config/config";
 import {AclPolicy} from "../cmn/enum/Acl";
-import {Vql, HLCondition} from "@vesta/core";
+import {HLCondition, Vql} from "@vesta/core";
 
 export interface IGroupsList {
     [group: string]: Array<IRole>
@@ -18,7 +18,8 @@ interface IResourceList {
     [name: string]: Array<string>;
 }
 
-export const enum AclScope{Model = 1, Entity, Field}
+export const enum AclScope {Model = 1, Entity, Field}
+
 /**
  * Private (Read mine, Write mine)
  * Shared (Read all, Write mine)
@@ -37,7 +38,7 @@ export class Acl {
     /** This is the {groupName: [IRole]}, a collection of all groups with their roles */
     private groups: IGroupsList = {};
 
-    constructor(private setting: IServerAppSetting, private defaultPolicy: AclPolicy) {
+    constructor(private setting: IServerAppConfig, private defaultPolicy: AclPolicy) {
     }
 
     /**

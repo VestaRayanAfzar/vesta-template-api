@@ -3,37 +3,37 @@ import {LogStorage} from "../helpers/LogFactory";
 import {LogLevel} from "../cmn/enum/Log";
 import {IDatabaseConfig} from "@vesta/core";
 
-export interface IAdminSetting {
+export interface IAdminConfig {
     logLevel: number;
     monitoring: boolean;
     samplingInterval: number;
 }
 
-export interface ILogSetting {
+export interface ILogConfig {
     level: LogLevel;
     dir: string;
     storage?: LogStorage;
 }
 
-export interface ISessionSetting {
+export interface ISessionConfig {
     maxAge: number;
     idPrefix: string;
     hashing: string;
     database: IDatabaseConfig
 }
 
-export interface ISecuritySetting {
+export interface ISecurityConfig {
     secret: string;
     salt: string;
     hashing: string;
     guestRoleName: string;
     rootRoleName: string;
-    session: ISessionSetting;
+    session: ISessionConfig;
 }
 
-export interface IServerAppSetting {
+export interface IServerAppConfig {
     env: string;
-    log: ILogSetting;
+    log: ILogConfig;
     version: { app: string; api: string };
     regenerateSchema: boolean;
     database: IDatabaseConfig;
@@ -45,25 +45,25 @@ export interface IServerAppSetting {
         html: string;
         log: string;
     };
-    security: ISecuritySetting;
+    security: ISecurityConfig;
 }
 
 let env = process.env;
 
-let adminSetting: IAdminSetting;
+let adminSetting: IAdminConfig;
 try {
-    adminSetting = JSON.parse(fs.readFileSync(__dirname + '/setting.json', {encoding: 'utf8'}));
+    adminSetting = JSON.parse(fs.readFileSync(__dirname + '/config.json', {encoding: 'utf8'}));
 } catch (err) {
     adminSetting = {
         logLevel: env.LOG_LEVEL,
         monitoring: false,
         samplingInterval: 0
     };
-    fs.writeFileSync(__dirname + '/setting.json', JSON.stringify(adminSetting));
+    fs.writeFileSync(__dirname + '/config.json', JSON.stringify(adminSetting));
     console.error(err);
 }
 
-export const setting: IServerAppSetting = {
+export const config: IServerAppConfig = {
     env: env.NODE_ENV,
     log: {
         level: adminSetting.logLevel,
@@ -74,7 +74,7 @@ export const setting: IServerAppSetting = {
         api: 'v1'
     },
     regenerateSchema: true,
-    http2: true,
+    http2: false,
     ssl: {
         key: '/ssl/server.key',
         cert: '/ssl/server.crt'

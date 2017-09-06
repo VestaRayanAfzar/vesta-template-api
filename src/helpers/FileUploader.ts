@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as formidable from "formidable";
 import {Files} from "formidable";
-import {setting} from "../config/setting";
+import {config} from "../config/config";
 import {Hashing} from "./Hashing";
 import {IExtRequest} from "../api/BaseController";
 import {Err} from "@vesta/core";
@@ -13,12 +13,12 @@ export class FileUploader<T> {
     private files: Files;
 
     constructor(private destination: string, private genRandomFileName: boolean = true) {
-        this.form.uploadDir = path.join(setting.dir.upload, 'tmp');
+        this.form.uploadDir = path.join(config.dir.upload, 'tmp');
         this.form.keepExtensions = true;
         this.form.multiples = true;
     }
 
-    public upload(req: IExtRequest): Promise<T> {
+    public upload(req: IExtRequest): Promise<any> {
         return new Promise((resolve, reject) => {
             this.form.parse(req, (err, fields, files) => {
                 if (err) return reject(new Err(Err.Code.WrongInput, err.message));
@@ -87,4 +87,4 @@ export class FileUploader<T> {
     }
 }
 
-mkdirp(path.join(setting.dir.upload, 'tmp'));
+mkdirp(path.join(config.dir.upload, 'tmp'));

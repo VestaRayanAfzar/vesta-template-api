@@ -36,7 +36,6 @@ export {
     IDeleteResult,
     IQueryRequest,
     ILocale,
-    IRequestResult,
     IModelFields,
     IModelValues,
     IModel,
@@ -46,7 +45,6 @@ export {
     IValidationModel,
     IValidationModelSet,
     IValidationError,
-    IValidationErrors,
     Validator,
     Schema,
     Platform

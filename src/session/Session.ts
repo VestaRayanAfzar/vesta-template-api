@@ -1,5 +1,5 @@
 import * as uuid from "node-uuid";
-import {ISessionSetting} from "../config/setting";
+import {ISessionConfig} from "../config/config";
 import {Logger} from "../helpers/Logger";
 import {JWT} from "../helpers/JWT";
 import {Response} from "express";
@@ -16,7 +16,7 @@ export interface ISessionData {
 }
 
 export class Session {
-    private static setting: ISessionSetting;
+    private static setting: ISessionConfig;
     private static db: KeyValueDatabase;
     public sessionId: string;
     public isExpired = false;
@@ -47,7 +47,7 @@ export class Session {
         this.sessionId = this.sessionData.meta.id;
     }
 
-    public static init(setting: ISessionSetting) {
+    public static init(setting: ISessionConfig) {
         Session.setting = setting;
         return new Redis(Session.setting.database).connect()
             .then(connection => {

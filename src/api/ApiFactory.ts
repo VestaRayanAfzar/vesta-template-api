@@ -1,4 +1,4 @@
-import {IServerAppSetting} from "../config/setting";
+import {IServerAppConfig} from "../config/config";
 import {Acl} from "../helpers/Acl";
 import {Router} from "express";
 import {exporter} from "./v1/import";
@@ -6,13 +6,13 @@ import {Database} from "@vesta/core";
 
 export class ApiFactory {
 
-    public static create(setting: IServerAppSetting, acl: Acl, database: Database): Promise<any> {
+    public static create(setting: IServerAppConfig, acl: Acl, database: Database): Promise<any> {
         let apiRouter = Router();
         return ApiFactory.loadControllers(setting, acl, database)
             .then(controllerRouter => apiRouter.use(`/api/${setting.version.api}`, controllerRouter))
     }
 
-    private static loadControllers(setting: IServerAppSetting, acl, database: Database): Promise<Router> {
+    private static loadControllers(setting: IServerAppConfig, acl, database: Database): Promise<Router> {
         return new Promise((resolve, reject) => {
             let router: Router = Router(),
                 resolveList: Array<Promise<boolean>> = [];

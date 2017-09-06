@@ -1,12 +1,12 @@
 import {Session} from "../session/Session";
 import {JWT} from "../helpers/JWT";
 import {IExtRequest} from "../api/BaseController";
-import {Response, NextFunction} from "express";
+import {NextFunction, Response} from "express";
 
 export function sessionMiddleware(req: IExtRequest, res: Response, next: NextFunction) {
     let token = req.get('X-Auth-Token');
     if (!token) return newSession();
-    JWT.verify(token, (err, payload) => err ? newSession() : restoreSession(payload.sessionId));
+    JWT.verify(token, (err, payload: any) => err ? newSession() : restoreSession(payload.sessionId));
 
     function newSession() {
         Session.create()

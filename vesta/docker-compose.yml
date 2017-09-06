@@ -28,6 +28,7 @@ services:
     ports:
       - '3000:3000'
       - '5858:5858'
+      - '9229:9229'
     volumes:
       - ../.:/app
       - ../resources/docker/ssl:/ssl

@@ -1,15 +1,15 @@
 import * as fs from "fs";
 import {Logger} from "./Logger";
-import {ILogSetting} from "../config/setting";
+import {ILogConfig} from "../config/config";
 import {ILogger} from "../cmn/interface/ILogger";
 
 export const enum LogStorage  {Console = 1, File}
 
 export class LogFactory {
-    static setting: ILogSetting;
+    static setting: ILogConfig;
     static logFile: string;
 
-    static init(setting: ILogSetting) {
+    static init(setting: ILogConfig) {
         LogFactory.setting = setting;
         let now = new Date();
         if (setting.storage == LogStorage.Console) {

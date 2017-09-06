@@ -1,11 +1,12 @@
-import {setting} from "../config/setting";
+import {config} from "../config/config";
 import * as crypto from "crypto";
 
 export class Hashing {
 
     public static withSalt(password: string): string {
-        let hash = crypto.createHash(setting.security.hashing);
-        let saltedPassword = password.length % 2 == 0 ? (setting.security.salt + password) : (password + setting.security.salt);
+        let {hashing, salt} = config.security;
+        let hash = crypto.createHash(hashing);
+        let saltedPassword = password.length % 2 == 0 ? (salt + password) : (password + salt);
         return hash.update(saltedPassword).digest('hex');
     }
 
@@ -15,7 +16,7 @@ export class Hashing {
     }
 
     public static simple(text: string) {
-        let hash = crypto.createHash(setting.security.hashing);
+        let hash = crypto.createHash(config.security.hashing);
         return hash.update(text).digest('hex');
     }
 }

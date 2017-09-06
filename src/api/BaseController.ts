@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from "express";
 import {Session} from "../session/Session";
-import {IServerAppSetting} from "../config/setting";
+import {IServerAppConfig} from "../config/config";
 import {IUser, User} from "../cmn/models/User";
 import {Acl} from "../helpers/Acl";
 import {IRole} from "../cmn/models/Role";
@@ -16,7 +16,7 @@ export interface IExtRequest extends Request {
 export abstract class BaseController {
     protected MAX_FETCH_COUNT = 50;
 
-    constructor(protected setting: IServerAppSetting, protected acl: Acl, protected database: Database) {
+    constructor(protected setting: IServerAppConfig, protected acl: Acl, protected database: Database) {
         this.init();
     }
 

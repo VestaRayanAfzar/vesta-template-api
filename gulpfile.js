@@ -12,9 +12,7 @@ const dir = {
     buildServer: path.join(root, 'vesta/server'),
 };
 
-const debug = {type: 'debug', ports: {debug: 5858, inspect: 9229}, address: '192.168.99.100'};
-const port = {api: 3000};
-
+const debug = {type: 'inspect', ports: {debug: 5858, inspect: 9229}, address: '192.168.99.100'};
 
 /**
  * This tasks is called by npm script for starting api server in docker env
