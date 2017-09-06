@@ -105,8 +105,7 @@ export class Acl {
         for (let i = groups.length; i--;) {
             let group = groups[i];
             if (group.status && group.roles) {
-                this.groups[group['name']] = this.groups[group['name']] || [];
-                this.groups[group['name']] = group.roles;
+                this.groups[group['name']] = <Array<IRole>>group.roles;
             }
         }
     }
