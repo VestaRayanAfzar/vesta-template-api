@@ -38,7 +38,7 @@ export class Acl {
     /** This is the {groupName: [IRole]}, a collection of all groups with their roles */
     private groups: IGroupsList = {};
 
-    constructor(private setting: IServerAppConfig, private defaultPolicy: AclPolicy) {
+    constructor(private config: IServerAppConfig, private defaultPolicy: AclPolicy) {
     }
 
     /**
@@ -176,7 +176,7 @@ export class Acl {
                 // todo is there a case in which no update occurred but populate function needs to be called ???
                 if (updateOperations.length) {
                     return Promise.all(updateOperations)
-                        .then(() => this.setting.regenerateSchema ? populate() : null);
+                        .then(() => this.config.regenerateSchema ? populate() : null);
                 }
             })
             .then(() => this.loadRoleGroups())

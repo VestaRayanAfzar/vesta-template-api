@@ -50,23 +50,23 @@ export interface IServerAppConfig {
 
 let env = process.env;
 
-let adminSetting: IAdminConfig;
+let adminConfig: IAdminConfig;
 try {
-    adminSetting = JSON.parse(fs.readFileSync(__dirname + '/config.json', {encoding: 'utf8'}));
+    adminConfig = JSON.parse(fs.readFileSync(__dirname + '/config.json', {encoding: 'utf8'}));
 } catch (err) {
-    adminSetting = {
+    adminConfig = {
         logLevel: env.LOG_LEVEL,
         monitoring: false,
         samplingInterval: 0
     };
-    fs.writeFileSync(__dirname + '/config.json', JSON.stringify(adminSetting));
+    fs.writeFileSync(__dirname + '/config.json', JSON.stringify(adminConfig));
     console.error(err);
 }
 
 export const config: IServerAppConfig = {
     env: env.NODE_ENV,
     log: {
-        level: adminSetting.logLevel,
+        level: adminConfig.logLevel,
         dir: '/log'
     },
     version: {

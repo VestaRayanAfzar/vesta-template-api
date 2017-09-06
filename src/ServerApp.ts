@@ -92,7 +92,7 @@ export class ServerApp {
                 return res.end();
             }
             // todo what if its a REST request
-            // res.sendFile(`${this.setting.dir.html}/index.html`);
+            // res.sendFile(`${this.config.dir.html}/index.html`);
             this.handleError(req, res, new Err(404, `Not Found: ${req.url}`))
         });
         // 50x Internal Server Error

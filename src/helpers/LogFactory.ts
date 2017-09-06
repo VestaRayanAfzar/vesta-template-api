@@ -3,19 +3,19 @@ import {Logger} from "./Logger";
 import {ILogConfig} from "../config/config";
 import {ILogger} from "../cmn/interface/ILogger";
 
-export const enum LogStorage  {Console = 1, File}
+export const enum LogStorage {Console = 1, File}
 
 export class LogFactory {
-    static setting: ILogConfig;
+    static config: ILogConfig;
     static logFile: string;
 
-    static init(setting: ILogConfig) {
-        LogFactory.setting = setting;
+    static init(logConfig: ILogConfig) {
+        LogFactory.config = logConfig;
         let now = new Date();
-        if (setting.storage == LogStorage.Console) {
+        if (logConfig.storage == LogStorage.Console) {
             return true;
         }
-        LogFactory.logFile = `${setting.dir}/${now.getTime()}-logger.log`;
+        LogFactory.logFile = `${logConfig.dir}/${now.getTime()}-logger.log`;
         try {
             if (!fs.existsSync(LogFactory.logFile)) {
                 fs.writeFileSync(`${LogFactory.logFile}`, `Initiating at ${now}`);
@@ -28,11 +28,11 @@ export class LogFactory {
     }
 
     static create() {
-        return new Logger(LogFactory.setting.level);
+        return new Logger(LogFactory.config.level);
     }
 
     static save(log: ILogger) {
-        if (LogFactory.setting.storage == LogStorage.Console) {
+        if (LogFactory.config.storage == LogStorage.Console) {
             console.log(`=== Level: ${log.level} === Start: ${log.start} === Duration: ${log.duration}`);
             for (let i = 0, il = log.data.length; i < il; ++i) {
                 console.log(log.data[i]);

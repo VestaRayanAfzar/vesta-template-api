@@ -7,7 +7,7 @@ export class IndexController extends BaseController {
         router.get('/', this.wrap(this.sayHi));
     }
 
-    private sayHi(req: IExtRequest, res: Response, next: NextFunction) {
-        res.json({poweredBy: 'Vesta Platform', message: `Welcome to V${this.setting.version.app}`});
+    private async sayHi(req: IExtRequest, res: Response, next: NextFunction) {
+        res.json({poweredBy: 'Vesta Platform', message: `Welcome to V${this.config.version.app}`});
     }
 }

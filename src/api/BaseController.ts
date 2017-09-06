@@ -16,7 +16,7 @@ export interface IExtRequest extends Request {
 export abstract class BaseController {
     protected MAX_FETCH_COUNT = 50;
 
-    constructor(protected setting: IServerAppConfig, protected acl: Acl, protected database: Database) {
+    constructor(protected config: IServerAppConfig, protected acl: Acl, protected database: Database) {
         this.init();
     }
 
@@ -44,7 +44,7 @@ export abstract class BaseController {
 
     protected user(req): User {
         let user = req.session.get('user');
-        user = user || {roleGroups: [{name: this.setting.security.guestRoleName}]};
+        user = user || {roleGroups: [{name: this.config.security.guestRoleName}]};
         return new User(user);
     }
 
@@ -60,7 +60,7 @@ export abstract class BaseController {
         return (req: IExtRequest, res: Response, next: NextFunction) => {
             if ((<IExtRequest>req).session) {
                 let user: IUser = (<IExtRequest>req).session.get<IUser>('user');
-                if (!user) user = {roleGroups: [{name: this.setting.security.guestRoleName}]};
+                if (!user) user = {roleGroups: [{name: this.config.security.guestRoleName}]};
                 for (let i = user.roleGroups.length; i--;) {
                     if (this.acl.isAllowed((<IRole>user.roleGroups[i]).name, resource, action)) {
                         return next();

@@ -16,18 +16,18 @@ export interface ISessionData {
 }
 
 export class Session {
-    private static setting: ISessionConfig;
+    private static config: ISessionConfig;
     private static db: KeyValueDatabase;
     public sessionId: string;
     public isExpired = false;
     public sessionData: ISessionData;
 
     constructor(data: ISessionData, persist?: boolean) {
-        let setting = Session.setting;
+        let {maxAge, idPrefix} = Session.config;
         let now = Date.now();
         if (data) {
             // restoring session
-            if (!data.meta.persist && now - data.meta.lastTime > setting.maxAge) {
+            if (!data.meta.persist && now - data.meta.lastTime > maxAge) {
                 this.isExpired = true;
             } else {
                 data.meta.lastTime = now;
@@ -38,7 +38,7 @@ export class Session {
             this.sessionData = {
                 payload: {},
                 meta: {
-                    id: setting.idPrefix + uuid.v4(),
+                    id: idPrefix + uuid.v4(),
                     lastTime: now,
                     persist: !!persist
                 }
@@ -47,9 +47,9 @@ export class Session {
         this.sessionId = this.sessionData.meta.id;
     }
 
-    public static init(setting: ISessionConfig) {
-        Session.setting = setting;
-        return new Redis(Session.setting.database).connect()
+    public static init(config: ISessionConfig) {
+        Session.config = config;
+        return new Redis(Session.config.database).connect()
             .then(connection => {
                 Session.db = connection;
             })

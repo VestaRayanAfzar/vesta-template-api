@@ -106,7 +106,7 @@ export class UserController extends BaseController {
 
     public async upload(req: IExtRequest, res: Response, next: NextFunction) {
         let user: User;
-        let destDirectory = path.join(this.setting.dir.upload, 'user');
+        let destDirectory = path.join(this.config.dir.upload, 'user');
         let result = await User.find<IUser>(+req.params.id);
         if (result.items.length != 1) throw new Err(Err.Code.DBRecordCount, 'User not found');
         delete result.items[0].password;

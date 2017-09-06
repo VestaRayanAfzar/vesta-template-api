@@ -1,13 +1,12 @@
-import {Response, Router, NextFunction} from "express";
+import {NextFunction, Response, Router} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {User, IUser} from "../../../cmn/models/User";
+import {IUser, User} from "../../../cmn/models/User";
 import {Session} from "../../../session/Session";
-import {RoleGroup, IRoleGroup} from "../../../cmn/models/RoleGroup";
+import {IRoleGroup, RoleGroup} from "../../../cmn/models/RoleGroup";
 import {Hashing} from "../../../helpers/Hashing";
 import {Permission} from "../../../cmn/models/Permission";
 import {Status} from "../../../cmn/enum/Status";
-import {ValidationError, DatabaseError, Err, IQueryResult} from "@vesta/core";
-import {throws} from "assert";
+import {DatabaseError, Err, IQueryResult, ValidationError} from "@vesta/core";
 
 
 export class AccountController extends BaseController {
@@ -88,17 +87,22 @@ export class AccountController extends BaseController {
     public async getMe(req: IExtRequest, res: Response, next: NextFunction) {
         let user = this.user(req);
         if (user.id) {
-            let result = await User.find<IUser>(user.id, {relations: [{name: 'roleGroups', fields: ['id', 'name', 'status']}]});
+            let result = await User.find<IUser>(user.id, {
+                relations: [{
+                    name: 'roleGroups',
+                    fields: ['id', 'name', 'status']
+                }]
+            });
             result.items[0].roleGroups = this.updateGroupRoles(<Array<RoleGroup>>result.items[0].roleGroups);
             result.items[0].password = '';
             res.json(result);
         } else {
-            let securitySetting = this.setting.security;
+            let {guestRoleName} = this.config.security;
             let guest = <IUser>{
-                username: securitySetting.guestRoleName,
+                username: guestRoleName,
                 roleGroups: this.updateGroupRoles([<IRoleGroup>{
                     status: Status.Active,
-                    name: securitySetting.guestRoleName
+                    name: guestRoleName
                 }])
             };
             res.json(<IQueryResult<IUser>>{items: [guest]});

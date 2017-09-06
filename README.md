@@ -10,7 +10,7 @@ Do NOT clone this repository directly, instead use [Vesta](https://github.com/Ve
  to create the project for you
 
 #### Development
-Set `regenerateSchema` value to `true` from `src/config/setting.ts`, for the first time to create the necessary tables.
+Set `regenerateSchema` value to `true` from `src/config/config.ts`, for the first time to create the necessary tables.
 Also after adding new models you have to change this to `true` for database to create related table. All your data will be erased if server starts and this value is set to true.
 
 *Do NOT forget to change this value to false to prevent data loss*

@@ -17,7 +17,7 @@ export class Logger {
     }
 
     private shouldNotBeLogged(): boolean {
-        return this.level <= LogFactory.setting.level;
+        return this.level <= LogFactory.config.level;
     }
 
     public debug(debug) {
