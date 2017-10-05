@@ -1,44 +1,33 @@
-import {Response, Router, NextFunction} from "express";
+import {NextFunction, Response, Router} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {Permission, IPermission} from "../../../cmn/models/Permission";
-import {Vql, ValidationError, DatabaseError, Err} from "@vesta/core";
-import {throws} from "assert";
+import {IPermission, Permission} from "../../../cmn/models/Permission";
+import {DatabaseError, Err, ValidationError} from "@vesta/core";
+import {AclAction} from "../../../cmn/enum/Acl";
 
 
 export class PermissionController extends BaseController {
 
     public route(router: Router) {
-        router.get('/acl/permission/:id', this.checkAcl('acl.permission', Permission.Action.Read), this.wrap(this.getPermission));
-        router.get('/acl/permission', this.checkAcl('acl.permission', Permission.Action.Read), this.wrap(this.getPermissions));
-        router.put('/acl/permission', this.checkAcl('acl.permission', Permission.Action.Edit), this.wrap(this.updatePermission));
-    }
-
-    protected init() {
+        router.get('/acl/permission/:id', this.checkAcl('acl.permission', AclAction.Read), this.wrap(this.getPermission));
+        router.get('/acl/permission', this.checkAcl('acl.permission', AclAction.Read), this.wrap(this.getPermissions));
+        router.put('/acl/permission', this.checkAcl('acl.permission', AclAction.Edit), this.wrap(this.updatePermission));
     }
 
     public async getPermission(req: IExtRequest, res: Response, next: NextFunction) {
-        let result = await Permission.find<IPermission>(req.params.id);
+        let id = this.retrieveId(req);
+        let result = await Permission.find<IPermission>(id);
         res.json(result);
     }
 
     public async getPermissions(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = new Vql(Permission.schema.name);
-        let filter = req.query.query;
-        if (filter) {
-            let permission = new Permission(filter);
-            let validationError = query && permission.validate(...Object.keys(filter));
-            if (validationError) {
-                throw new ValidationError(validationError);
-            }
-            query.filter(filter);
-        }
+        let query = this.query2vql(Permission, req);
         let result = await Permission.find(query);
         res.json(result);
     }
 
     public async updatePermission(req: IExtRequest, res: Response, next: NextFunction) {
-        let permission = new Permission(req.body),
-            validationError = permission.validate();
+        let permission = new Permission(req.body);
+        let validationError = permission.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
@@ -46,9 +35,9 @@ export class PermissionController extends BaseController {
         if (result.items.length == 1) {
             result.items[0].status = permission.status;
             permission.setValues(result.items[0]);
-            let presult = await permission.update();
+            let pResult = await permission.update();
             await this.acl.initAcl();
-            res.json(presult);
+            res.json(pResult);
         } else {
             throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
         }

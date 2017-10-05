@@ -13,9 +13,10 @@ import {loggerMiddleware} from "./middlewares/logger";
 import {LogFactory, LogStorage} from "./helpers/LogFactory";
 import {Session} from "./session/Session";
 import {AclPolicy} from "./cmn/enum/Acl";
-import {Database, Err, IModelCollection, KeyValueDatabase} from "@vesta/core";
+import {Database, Err, IDatabase, IModelCollection, KeyValueDatabase} from "@vesta/core";
 import {MySQL} from "@vesta/driver-mysql";
 import * as spdy from "spdy"
+
 let cors = require('cors');
 let helmet = require('helmet');
 
@@ -87,17 +88,15 @@ export class ServerApp {
     private initErrorHandlers() {
         // 404 Not Found
         this.app.use((req: IExtRequest, res: express.Response, next: express.NextFunction) => {
-            if (/.+\.(html|htm|js|css|xml|png|jpg|jpeg|gif|pdf|txt|ico|woff|woff2|svg|eot|ttf|rss|zip|mp3|rar|exe|wmv|doc|avi|ppt|mpg|mpeg|tif|wav|mov|psd|ai|xls|mp4|m4a|swf|dat|dmg|iso|flv|m4v|torrent)$/i.exec(req.url)) {
-                res.status(404);
-                return res.end();
-            }
-            // todo what if its a REST request
-            // res.sendFile(`${this.config.dir.html}/index.html`);
             this.handleError(req, res, new Err(404, `Not Found: ${req.url}`))
         });
         // 50x Internal Server Error
         this.app.use((err: any, req: IExtRequest, res: express.Response, next: express.NextFunction) => {
             this.handleError(req, res, err);
+        });
+        //
+        process.on('unhandledRejection', (reason) => {
+            console.error(`Unhandled Rejection at: ${reason}`);
         });
     }
 
@@ -114,7 +113,7 @@ export class ServerApp {
             }
         }
         // registering database drivers
-        DatabaseFactory.register('appDatabase', this.config.database, MySQL, models);
+        DatabaseFactory.register('appDatabase', this.config.database, <IDatabase>MySQL, models);
         // getting application database instance
         let db = await DatabaseFactory.getInstance('appDatabase');
         this.config.regenerateSchema ? await db.init() : db

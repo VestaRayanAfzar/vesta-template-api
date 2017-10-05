@@ -1,11 +1,11 @@
-import {Router, Request, Response, NextFunction} from "express";
+import {NextFunction, Request, Response, Router} from "express";
 import {Session} from "../session/Session";
 import {IServerAppConfig} from "../config/config";
 import {IUser, User} from "../cmn/models/User";
 import {Acl} from "../helpers/Acl";
 import {IRole} from "../cmn/models/Role";
 import {Logger} from "../helpers/Logger";
-import {Database, Err, KeyValueDatabase} from "@vesta/core";
+import {Database, Err, IModel, IQueryRequest, KeyValueDatabase, ValidationError, Vql} from "@vesta/core";
 
 export interface IExtRequest extends Request {
     log: Logger;
@@ -58,17 +58,51 @@ export abstract class BaseController {
     protected checkAcl(resource: string, action: string) {
         this.acl.addResource(resource, action);
         return (req: IExtRequest, res: Response, next: NextFunction) => {
-            if ((<IExtRequest>req).session) {
-                let user: IUser = (<IExtRequest>req).session.get<IUser>('user');
-                if (!user) user = {roleGroups: [{name: this.config.security.guestRoleName}]};
-                for (let i = user.roleGroups.length; i--;) {
-                    if (this.acl.isAllowed((<IRole>user.roleGroups[i]).name, resource, action)) {
+            if (req.session) {
+                let user: IUser = req.session.get<IUser>('user');
+                if (!user) {
+                    user = {role: {name: this.config.security.guestRoleName}};
+                }
+                if (this.acl.isAllowed((<IRole>user.role).name, resource, action)) {
                         return next();
                     }
                 }
-            }
             next(new Err(Err.Code.Forbidden, 'Access to this edge is forbidden'));
         }
+    }
+
+    protected retrieveId(req: IExtRequest): number {
+        let id = +req.params.id;
+        if (isNaN(id)) {
+            throw new ValidationError({id: 'number'});
+        }
+        return id;
+    }
+
+    protected query2vql<T>(modelClass: IModel, req: IQueryRequest<T>, isCounting?: boolean): Vql {
+        let fields = [];
+        for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
+            if (fieldNames[i] in req.query) {
+                fields.push(fieldNames[i]);
+            }
+        }
+        let query = new Vql(modelClass.schema.name);
+        if (fields.length) {
+            let model = new modelClass(req.query);
+            let validationError = query && model.validate(...fields);
+            if (validationError) {
+                throw new ValidationError(validationError)
+            }
+            query.filter(req.query);
+        }
+        if (!isCounting) {
+            query.limitTo(Math.min(+req.limit || this.MAX_FETCH_COUNT, this.MAX_FETCH_COUNT)).fromPage(+req.page || 1);
+            if (req.orderBy) {
+                let orderBy = req.orderBy[0];
+                query.sortBy(orderBy.field, orderBy.ascending);
+            }
+        }
+        return query;
     }
 
     protected wrap(action: (req: IExtRequest, res: Response, next: NextFunction) => any) {

@@ -8,7 +8,7 @@
     "noEmitHelpers": true
   },
   "include": [
-    "src/app.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "resources"

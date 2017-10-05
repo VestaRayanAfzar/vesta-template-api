@@ -11,6 +11,7 @@ export interface ISessionData {
     meta: {
         id: string;
         lastTime: number;
+        // remember me
         persist?: boolean;
     }
 }
@@ -27,7 +28,7 @@ export class Session {
         let now = Date.now();
         if (data) {
             // restoring session
-            if (!data.meta.persist && now - data.meta.lastTime > maxAge) {
+            if (!data.meta.persist && maxAge && now - data.meta.lastTime > maxAge) {
                 this.isExpired = true;
             } else {
                 data.meta.lastTime = now;
@@ -40,7 +41,7 @@ export class Session {
                 meta: {
                     id: idPrefix + uuid.v4(),
                     lastTime: now,
-                    persist: !!persist
+                    persist: persist
                 }
             }
         }

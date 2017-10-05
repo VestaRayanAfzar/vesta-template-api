@@ -1,46 +1,33 @@
 import * as path from "path";
-import {Response, Router, NextFunction} from "express";
+import {Response, Router} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
-import {User, IUser} from "../../../cmn/models/User";
-import {Permission} from "../../../cmn/models/Permission";
+import {IUser, User} from "../../../cmn/models/User";
 import {FileUploader} from "../../../helpers/FileUploader";
-import {Vql, ValidationError, DatabaseError, Err} from "@vesta/core";
+import {DatabaseError, Err, ValidationError} from "@vesta/core";
+import {AclAction} from "../../../cmn/enum/Acl";
 
 
 export class UserController extends BaseController {
 
     public route(router: Router) {
-        router.get('/user/count', this.checkAcl('user', Permission.Action.Read), this.wrap(this.getUserCount));
-        router.get('/user/:id', this.checkAcl('user', Permission.Action.Read), this.wrap(this.getUser));
-        router.get('/user', this.checkAcl('user', Permission.Action.Read), this.wrap(this.getUsers));
-        router.post('/user', this.checkAcl('user', Permission.Action.Add), this.wrap(this.addUser));
-        router.put('/user', this.checkAcl('user', Permission.Action.Edit), this.wrap(this.updateUser));
-        router.delete('/user/:id', this.checkAcl('user', Permission.Action.Delete), this.wrap(this.removeUser));
-        router.post('/user/file/:id', this.checkAcl('user', Permission.Action.Edit), this.wrap(this.upload));
+        router.get('/user/count', this.checkAcl('user', AclAction.Read), this.wrap(this.getUserCount));
+        router.get('/user/:id', this.checkAcl('user', AclAction.Read), this.wrap(this.getUser));
+        router.get('/user', this.checkAcl('user', AclAction.Read), this.wrap(this.getUsers));
+        router.post('/user', this.checkAcl('user', AclAction.Add), this.wrap(this.addUser));
+        router.put('/user', this.checkAcl('user', AclAction.Edit), this.wrap(this.updateUser));
+        router.delete('/user/:id', this.checkAcl('user', AclAction.Delete), this.wrap(this.removeUser));
+        router.post('/user/file/:id', this.checkAcl('user', AclAction.Edit), this.wrap(this.upload));
     }
 
-    protected init() {
-    }
-
-    public async getUserCount(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = new Vql(User.schema.name);
-        let filter = req.query.query;
-        if (filter) {
-            let user = new User(filter);
-            let validationError = query && user.validate(...Object.keys(filter));
-            if (validationError) {
-                throw new ValidationError(validationError);
-            }
-            query.filter(filter);
-        }
+    public async getUserCount(req: IExtRequest, res: Response) {
+        let query = this.query2vql(User, req.query, true);
         let result = await User.count(query);
         res.json(result)
     }
 
-    public async getUser(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = new Vql(User.schema.name);
-        query.filter({id: req.params.id}).fetchRecordFor('roleGroups');
-        let result = await User.find<IUser>(query);
+    public async getUser(req: IExtRequest, res: Response) {
+        let id = this.retrieveId(req);
+        let result = await User.find<IUser>(id, {relations: ['role']});
         if (result.items.length == 1) {
             delete result.items[0].password;
             res.json(result);
@@ -49,22 +36,8 @@ export class UserController extends BaseController {
         }
     }
 
-    public async getUsers(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = new Vql(User.schema.name);
-        let filter = req.query.query;
-        if (filter) {
-            let user = new User(filter);
-            let validationError = query && user.validate(...Object.keys(filter));
-            if (validationError) {
-                throw new ValidationError(validationError)
-            }
-            query.filter(filter);
-        }
-        query.limitTo(Math.min(+req.query.limit || this.MAX_FETCH_COUNT, this.MAX_FETCH_COUNT)).fromPage(+req.query.page || 1);
-        if (req.query.orderBy) {
-            let orderBy = req.query.orderBy[0];
-            query.sortBy(orderBy.field, orderBy.ascending == 'true');
-        }
+    public async getUsers(req: IExtRequest, res: Response) {
+        let query = this.query2vql(User, req.query);
         let result = await User.find<IUser>(query);
         for (let i = result.items.length; i--;) {
             delete result.items[i].password;
@@ -72,9 +45,9 @@ export class UserController extends BaseController {
         res.json(result);
     }
 
-    public async addUser(req: IExtRequest, res: Response, next: NextFunction) {
-        let user = new User(req.body),
-            validationError = user.validate();
+    public async addUser(req: IExtRequest, res: Response) {
+        let user = new User(req.body);
+        let validationError = user.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
@@ -82,9 +55,9 @@ export class UserController extends BaseController {
         res.json(result)
     }
 
-    public async updateUser(req: IExtRequest, res: Response, next: NextFunction) {
-        let user = new User(req.body),
-            validationError = user.validate();
+    public async updateUser(req: IExtRequest, res: Response) {
+        let user = new User(req.body);
+        let validationError = user.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
@@ -98,17 +71,26 @@ export class UserController extends BaseController {
         }
     }
 
-    public async removeUser(req: IExtRequest, res: Response, next: NextFunction) {
-        let user = new User({id: req.params.id});
+    public async removeUser(req: IExtRequest, res: Response) {
+        let id = this.retrieveId(req.params.id);
+        let user = new User({id});
+        // todo checking root user
+        let uResult = await User.find<IUser>(id);
+        if (uResult.items[0].username == this.config.security.rootRoleName) {
+            throw new Err(Err.Code.WrongInput);
+        }
         let result = await user.remove();
         res.json(result)
     }
 
-    public async upload(req: IExtRequest, res: Response, next: NextFunction) {
+    public async upload(req: IExtRequest, res: Response) {
+        let id = this.retrieveId(req);
         let user: User;
         let destDirectory = path.join(this.config.dir.upload, 'user');
-        let result = await User.find<IUser>(+req.params.id);
-        if (result.items.length != 1) throw new Err(Err.Code.DBRecordCount, 'User not found');
+        let result = await User.find<IUser>(id);
+        if (result.items.length != 1) {
+            throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
+        }
         delete result.items[0].password;
         user = new User(result.items[0]);
         let uploader = new FileUploader<IUser>(destDirectory);

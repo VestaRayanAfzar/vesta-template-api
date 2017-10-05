@@ -2,6 +2,7 @@ import * as fs from "fs";
 import {LogStorage} from "../helpers/LogFactory";
 import {LogLevel} from "../cmn/enum/Log";
 import {IDatabaseConfig} from "@vesta/core";
+import {dirname} from "path";
 
 export interface IAdminConfig {
     logLevel: number;
@@ -41,6 +42,7 @@ export interface IServerAppConfig {
     http2?: boolean;
     ssl?: { key: string, cert: string }
     dir: {
+        root: string;
         upload: string;
         html: string;
         log: string;
@@ -52,7 +54,7 @@ let env = process.env;
 
 let adminConfig: IAdminConfig;
 try {
-    adminConfig = JSON.parse(fs.readFileSync(__dirname + '/config.json', {encoding: 'utf8'}));
+    adminConfig = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
 } catch (err) {
     adminConfig = {
         logLevel: env.LOG_LEVEL,
@@ -88,6 +90,7 @@ export const config: IServerAppConfig = {
         database: env.ADB_NAME
     },
     dir: {
+        root: dirname(__dirname),
         upload: '/upload',
         html: '../www',
         log: '/log'
@@ -100,7 +103,7 @@ export const config: IServerAppConfig = {
         guestRoleName: 'guest',
         rootRoleName: 'root',
         session: {
-            maxAge: 6 * 3600 * 1000,// 6 hours
+            maxAge: 0,
             idPrefix: 'sess:',
             hashing: 'HS256',
             database: <IDatabaseConfig>{
