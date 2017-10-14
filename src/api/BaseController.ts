@@ -64,9 +64,9 @@ export abstract class BaseController {
                     user = {role: {name: this.config.security.guestRoleName}};
                 }
                 if (this.acl.isAllowed((<IRole>user.role).name, resource, action)) {
-                        return next();
-                    }
+                    return next();
                 }
+            }
             next(new Err(Err.Code.Forbidden, 'Access to this edge is forbidden'));
         }
     }
@@ -79,11 +79,13 @@ export abstract class BaseController {
         return id;
     }
 
-    protected query2vql<T>(modelClass: IModel, req: IQueryRequest<T>, isCounting?: boolean): Vql {
+    protected query2vql<T>(modelClass: IModel, req: IQueryRequest<T>, isCounting?: boolean, isSearch?: boolean): Vql {
         let fields = [];
-        for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
-            if (fieldNames[i] in req.query) {
-                fields.push(fieldNames[i]);
+        if (req.query) {
+            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
+                if (fieldNames[i] in req.query) {
+                    fields.push(fieldNames[i]);
+                }
             }
         }
         let query = new Vql(modelClass.schema.name);
@@ -93,13 +95,15 @@ export abstract class BaseController {
             if (validationError) {
                 throw new ValidationError(validationError)
             }
-            query.filter(req.query);
+            isSearch ? query.search(req.query, modelClass) : query.filter(req.query);
         }
         if (!isCounting) {
             query.limitTo(Math.min(+req.limit || this.MAX_FETCH_COUNT, this.MAX_FETCH_COUNT)).fromPage(+req.page || 1);
-            if (req.orderBy) {
-                let orderBy = req.orderBy[0];
-                query.sortBy(orderBy.field, orderBy.ascending);
+            if (req.orderBy && req.orderBy.length) {
+                let orderBy = req.orderBy;
+                for (let i = 0, il = req.orderBy.length; i < il; ++i) {
+                    query.sortBy(orderBy[i].field, orderBy[i].ascending);
+                }
             }
         }
         return query;

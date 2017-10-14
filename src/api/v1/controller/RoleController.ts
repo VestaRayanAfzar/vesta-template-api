@@ -22,7 +22,7 @@ export class RoleController extends BaseController {
     }
 
     public async getRoles(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = this.query2vql(Role, req);
+        let query = this.query2vql(Role, req.query);
         let result = await Role.find(query);
         res.json(result)
     }

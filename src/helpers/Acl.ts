@@ -43,13 +43,13 @@ export class Acl {
     public isAllowed(role: string, resource: string, action: string): boolean {
         if (!(role in this.roles)) {
             return this.defaultPolicy == AclPolicy.Allow;
-            }
+        }
         for (let i = this.roles[role].length; i--;) {
             let permission = this.roles[role][i];
-                    if (permission.resource == '*' || permission.resource == resource) {
-                        if (permission.action == '*' || permission.action == action) return true;
-                    }
-                }
+            if (permission.resource == '*' || permission.resource == resource) {
+                if (permission.action == '*' || permission.action == action) return true;
+            }
+        }
         return false;
     }
 
@@ -61,8 +61,8 @@ export class Acl {
         for (let i = 0, il = roles.length; i < il; ++i) {
             const role = roles[i];
             if (!role.status) continue;
-                for (let j = role.permissions.length; j--;) {
-                    let permission: IPermission = <IPermission>role.permissions[j];
+            for (let j = role.permissions.length; j--;) {
+                let permission: IPermission = <IPermission>role.permissions[j];
                 if (permission.status) {
                     this.allow(role.name, permission.resource, permission.action);
                 }
@@ -91,49 +91,50 @@ export class Acl {
     public async initAcl() {
         let pResult = await Permission.find<IPermission>(new Vql(Permission.schema.name));
         let dbPermissions: Array<IPermission> = pResult.items;
-                let updateOperations = [];
-                // Finding new permissions to be added to database
-                let newPermissions: Array<IPermission> = [];
+        let updateOperations = [];
+        // Finding new permissions to be added to database
+        let newPermissions: Array<IPermission> = [];
         for (let i = 0, appResources = Object.keys(this.resourceList), il = appResources.length; i < il; ++i) {
             let appResource = appResources[i];
             let appActions = this.resourceList[appResource];
             for (let j = appActions.length; j--;) {
                 let appAction = appActions[j];
-                        let found = false;
+                let found = false;
                 for (let k = dbPermissions.length; k--;) {
-                    let dbResource = dbPermissions[j].resource;
-                    let dbAction = dbPermissions[j].action;
+                    let dbResource = dbPermissions[k].resource;
+                    let dbAction = dbPermissions[k].action;
                     if (appResource == dbResource && appAction == dbAction) {
-                                found = true;
-                            }
-                        }
-                        if (!found) {
-                    newPermissions.push({resource: appResource, action: appAction, status: Status.Active});
-                        }
+                        found = true;
+                        break;
                     }
                 }
-                if (newPermissions.length) {
-                    updateOperations.push(Permission.insert(newPermissions));
+                if (!found) {
+                    newPermissions.push({resource: appResource, action: appAction, status: Status.Active});
                 }
-                // Finding deprecated permissions to be deleted from database
-                let deprecatedPermissions = [];
+            }
+        }
+        if (newPermissions.length) {
+            updateOperations.push(Permission.insert(newPermissions));
+        }
+        // Finding deprecated permissions to be deleted from database
+        let deprecatedPermissions = [];
         for (let i = dbPermissions.length; i--;) {
             let dbResource = dbPermissions[i].resource;
             let dbAction = dbPermissions[i].action;
-                    if (!this.resourceList[dbResource] || this.resourceList[dbResource].indexOf(dbAction) < 0) {
+            if (!this.resourceList[dbResource] || this.resourceList[dbResource].indexOf(dbAction) < 0) {
                 deprecatedPermissions.push(dbPermissions[i].id);
-                    }
-                }
-                if (deprecatedPermissions.length) {
-            let conditions = deprecatedPermissions.map(id=> HLCondition.eq('id', id));
-                    updateOperations.push(Permission.remove(HLCondition.or(...conditions)));
-                }
+            }
+        }
+        if (deprecatedPermissions.length) {
+            let conditions = deprecatedPermissions.map(id => HLCondition.eq('id', id));
+            updateOperations.push(Permission.remove(HLCondition.or(...conditions)));
+        }
         // waiting for operations to finish
-                if (updateOperations.length) {
-                    return Promise.all(updateOperations)
+        if (updateOperations.length) {
+            return Promise.all(updateOperations)
                 .then(async () => this.config.regenerateSchema ? await populate() : null)
                 .then(() => this.loadRoles());
-                }
+        }
         return this.loadRoles();
     }
 

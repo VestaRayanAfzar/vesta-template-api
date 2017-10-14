@@ -25,7 +25,7 @@ let tryCounter = 1;
             }, nextTryInterval);
         } else {
             console.error('MAX_TRY_COUNT reached; exiting server...');
-        process.exit(1);
-    	}
+            process.exit(1);
+        }
     }
 })();

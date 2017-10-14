@@ -48,7 +48,7 @@ gulp.task('api', function () {
                     let url = data[0]['devtoolsFrontendUrl'];
                     let regex = new RegExp(`&ws=[^:]+:${debug.ports.inspect}\/`);
                     url = url.replace(regex, `&ws=${debug.address}:${debug.ports.inspect}/`);
-                    process.stdout.write(`\n\nInspect URL: "${chalk.cyan(url)}"\n\n`);
+                    process.stdout.write(`\n\nInspect URL: \n${chalk.cyan(url)}\n\n`);
                 })
             }).on('error', err => process.stderr.write(err.message));
         }
