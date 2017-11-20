@@ -1,9 +1,12 @@
-import * as http from "http";
 import * as express from "express";
-import * as bodyParser from "body-parser";
 import * as morgan from "morgan";
-import * as fs from "fs";
-import {IServerAppConfig} from "./config/config";
+import * as spdy from "spdy";
+import {createServer, Server} from "http";
+import {json, urlencoded} from "body-parser";
+import {readdirSync, readFileSync} from "fs";
+import {Err} from "./cmn/core/Err";
+import {MySQL} from "./driver/MySQL";
+import {IServerAppConfig} from "./helpers/Config";
 import {ApiFactory} from "./api/ApiFactory";
 import {sessionMiddleware} from "./middlewares/session";
 import {IExtRequest} from "./api/BaseController";
@@ -13,16 +16,14 @@ import {loggerMiddleware} from "./middlewares/logger";
 import {LogFactory, LogStorage} from "./helpers/LogFactory";
 import {Session} from "./session/Session";
 import {AclPolicy} from "./cmn/enum/Acl";
-import {Database, Err, IDatabase, IModelCollection, KeyValueDatabase} from "@vesta/core";
-import {MySQL} from "@vesta/driver-mysql";
-import * as spdy from "spdy"
+import {Database, IModelCollection, KeyValueDatabase} from "./cmn/core/Database";
 
 let cors = require('cors');
 let helmet = require('helmet');
 
 export class ServerApp {
     private app: express.Express;
-    private server: spdy.Server | http.Server;
+    private server: spdy.Server | Server;
     private sessionDatabase: KeyValueDatabase;
     private database: Database;
     private acl: Acl;
@@ -31,12 +32,12 @@ export class ServerApp {
         this.app = express();
         if (config.http2) {
             const options = {
-                key: fs.readFileSync(config.ssl.key),
-                cert: fs.readFileSync(config.ssl.cert)
+                key: readFileSync(config.ssl.key),
+                cert: readFileSync(config.ssl.cert)
             };
             this.server = spdy.createServer(options, <any>this.app);
         } else {
-            this.server = http.createServer(this.app);
+            this.server = createServer(this.app);
         }
         this.server.on('error', err => console.error(err));
         this.acl = new Acl(config, AclPolicy.Deny);
@@ -60,8 +61,8 @@ export class ServerApp {
         }));
         this.app.use(loggerMiddleware);
         this.app.use(morgan(this.config.env == 'development' ? 'dev' : 'combined'));
-        this.app.use(bodyParser.urlencoded({limit: '50mb', extended: false}));
-        this.app.use(bodyParser.json({limit: '50mb'}));
+        this.app.use(urlencoded({limit: '50mb', extended: false}));
+        this.app.use(json({limit: '50mb'}));
         // closing connection after sending response ???
         this.app.use((req: IExtRequest, res: express.Response, next: express.NextFunction) => {
             res.set('Connection', 'Close');
@@ -76,7 +77,6 @@ export class ServerApp {
 
     private async initRouting(): Promise<any> {
         this.app.use('/upl', express.static(this.config.dir.upload));
-        this.app.use('/asset', express.static(this.config.dir.html));
         this.app.use((req: IExtRequest, res, next) => {
             req.sessionDB = this.sessionDatabase;
             sessionMiddleware(req, res, next);
@@ -102,7 +102,7 @@ export class ServerApp {
 
     private async initDatabase(): Promise<any> {
         let modelsDirectory = `${__dirname}/cmn/models`;
-        let modelFiles = fs.readdirSync(modelsDirectory);
+        let modelFiles = readdirSync(modelsDirectory);
         let models: IModelCollection = {};
         // creating models list
         for (let i = modelFiles.length; i--;) {
@@ -113,7 +113,7 @@ export class ServerApp {
             }
         }
         // registering database drivers
-        DatabaseFactory.register('appDatabase', this.config.database, <IDatabase>MySQL, models);
+        DatabaseFactory.register('appDatabase', this.config.database, MySQL, models);
         // getting application database instance
         let db = await DatabaseFactory.getInstance('appDatabase');
         this.config.regenerateSchema ? await db.init() : db
@@ -143,11 +143,11 @@ export class ServerApp {
      */
     private handleError(req: IExtRequest, res: express.Response, error: Err) {
         req.log.err(error);
-        if (this.config.env == 'production') {
-            error = new Err(Err.Code.Server);
-        } else {
-            error.code = error.code || Err.Code.Server;
-        }
+        // if (this.config.env == 'production') {
+        // error = new Err(Err.Code.Server);
+        // } else {
+        error.code = error.code || Err.Code.Server;
+        // }
         res.status(error.code < Err.Code.Client ? Err.Code.Server : error.code);
         res.json({error});
     }

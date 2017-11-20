@@ -1,6 +1,6 @@
-import * as fs from "fs";
+import {appendFile, existsSync, writeFileSync} from "fs";
+import {ILogConfig} from "./Config";
 import {Logger} from "./Logger";
-import {ILogConfig} from "../config/config";
 import {ILogger} from "../cmn/interface/ILogger";
 
 export const enum LogStorage {Console = 1, File}
@@ -17,8 +17,8 @@ export class LogFactory {
         }
         LogFactory.logFile = `${logConfig.dir}/${now.getTime()}-logger.log`;
         try {
-            if (!fs.existsSync(LogFactory.logFile)) {
-                fs.writeFileSync(`${LogFactory.logFile}`, `Initiating at ${now}`);
+            if (!existsSync(LogFactory.logFile)) {
+                writeFileSync(`${LogFactory.logFile}`, `Initiating at ${now}`);
             }
         } catch (e) {
             console.log('LogFactory.init ERROR::', e);
@@ -39,7 +39,7 @@ export class LogFactory {
             }
             return;
         }
-        fs.appendFile(LogFactory.logFile, `\n${JSON.stringify(log)}`, {encoding: 'utf8'}, err => {
+        appendFile(LogFactory.logFile, `\n${JSON.stringify(log)}`, {encoding: 'utf8'}, err => {
             console.error(err);
         });
     }

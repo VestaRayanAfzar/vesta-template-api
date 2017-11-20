@@ -19,4 +19,16 @@ export class Hashing {
         let hash = crypto.createHash(config.security.hashing);
         return hash.update(text).digest('hex');
     }
+
+    public static randomInt(length: number = 6): number {
+        let nums = [];
+        for (let i = 0; i < length; ++i) {
+            let rand = 0;
+            do {
+                rand = Math.floor(Math.random() * 10);
+            } while (nums.indexOf(rand) >= 0);
+            nums.push(rand);
+        }
+        return +nums.join('');
+    }
 }

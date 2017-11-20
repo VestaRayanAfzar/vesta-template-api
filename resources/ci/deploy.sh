@@ -2,30 +2,9 @@
 
 CLONE_PATH=$1
 DEPLOY_PATH=$2
-NGINX_PATH=/etc/nginx/conf.d/api.conf
-NODE_PKG_CACHE_PATH=/tmp/expressJsTemplate_node_modules
+NGINX_PATH=/etc/nginx/conf.d/vesta-api.conf
 WD=`pwd`
 counter=0
-
-npm_install(){
-  BACKUP_PATH=${NODE_PKG_CACHE_PATH}_${1}
-
-  if [ -d ${BACKUP_PATH} ]; then
-    cp -R ${BACKUP_PATH} node_modules
-  fi
-
-  if [ $1 == "production" ]; then
-    npm install --no-progress --production
-  else
-    npm install --no-progress
-  fi;
-
-  if [ -d ${BACKUP_PATH} ]; then
-    rm -rf ${BACKUP_PATH}
-  fi
-
-  cp -R node_modules ${BACKUP_PATH}
-}
 
 print_status(){
   ((counter=counter+1))
@@ -39,21 +18,26 @@ print_status "Cloning SubModules"
 git checkout master
 git submodule update --init src/cmn
 git submodule foreach git checkout master
+mv resources/gitignore/config.var.ts src/config/config.var.ts
+
+print_status "Executing pre-deploy Script"
+chmod +x resources/ci/scripts/pre-deploy.js
+./resources/ci/scripts/pre-deploy.js
 
 print_status "Installing Node Packages"
-npm_install dev
+npm install
 print_status "Running Deploy Tasks"
-gulp deploy
+#npm run deploy
+tsc
+#print_status "Configuring NGINX"
+#mkdir /vesta/ssl
+#mv resources/ci/ssl /vesta/
+#sudo mv resources/ci/nginx/api.conf ${NGINX_PATH}
 
-print_status "Configuring NGINX"
-cd ${WD}
-mv ${CLONE_PATH}/resources/docker/nginx.conf ${NGINX_PATH}
-cd ${CLONE_PATH}
-
-print_status "Installing node packages for Web Server"
-cp package.json build/app/package.json
-cd build/app
-npm_install production
+print_status "Installing node packages for Api Server"
+cp package.json vesta/server/package.json
+cd vesta/server
+npm install --production
 
 cd ${WD}
 if [ -d ${DEPLOY_PATH} ]; then
@@ -66,11 +50,15 @@ fi
 
 rm -rf ${DEPLOY_PATH}
 mkdir -p ${DEPLOY_PATH}
-mv ${CLONE_PATH}/build/app ${DEPLOY_PATH}/app
-mv ${CLONE_PATH}/resources/docker/docker-compose.yml ${DEPLOY_PATH}/docker-compose.yml
+mv ${CLONE_PATH}/vesta/server ${DEPLOY_PATH}/app
+mv ${CLONE_PATH}/resources/ci/docker/docker-compose.yml ${DEPLOY_PATH}/docker-compose.yml
 
 print_status "Starting Containers"
 cd ${DEPLOY_PATH}
 docker-compose up -d --build
+
+#print_status "Re-Starting NGINX"
+#sudo service nginx restart
+
 print_status "All done"
 exit 0

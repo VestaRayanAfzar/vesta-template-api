@@ -1,8 +1,8 @@
-import {IServerAppConfig} from "../config/config";
+import {Database} from "../cmn/core/Database";
+import {IServerAppConfig} from "../helpers/Config";
 import {Acl} from "../helpers/Acl";
 import {Router} from "express";
 import {exporter} from "./v1/import";
-import {Database} from "@vesta/core";
 
 export class ApiFactory {
 

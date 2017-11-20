@@ -1,6 +1,5 @@
 import {exists} from "fs";
 import {NextFunction, Response, Router} from "express";
-import {Err} from "@vesta/core";
 import {BaseController, IExtRequest} from "../../BaseController";
 
 export class IndexController extends BaseController {

@@ -4,6 +4,7 @@
 npm-debug*
 /resources/tsd
 /resources/log
+/src/config/config.var.ts
 tsd-debug*
 /vesta/server/*
 !/vesta/server/docker-compose.yml

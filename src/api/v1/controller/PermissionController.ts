@@ -1,7 +1,9 @@
 import {NextFunction, Response, Router} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
 import {IPermission, Permission} from "../../../cmn/models/Permission";
-import {DatabaseError, Err, ValidationError} from "@vesta/core";
+import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
+import {Err} from "../../../cmn/core/Err";
+import {ValidationError} from "../../../cmn/core/error/ValidationError";
 import {AclAction} from "../../../cmn/enum/Acl";
 
 
@@ -20,7 +22,9 @@ export class PermissionController extends BaseController {
     }
 
     public async getPermissions(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = this.query2vql(Permission, req);
+        let query = this.query2vql(Permission, req.query, false, true);
+        // removing limit
+        delete query.limit;
         let result = await Permission.find(query);
         res.json(result);
     }

@@ -1,12 +1,14 @@
+import {Database, IDatabase, IDatabaseConfig, IModelCollection} from "../cmn/core/Database";
+import {DatabaseError} from "../cmn/core/error/DatabaseError";
+import {Err} from "../cmn/core/Err";
 
-import {IDatabase, IModelCollection, Database, IDatabaseConfig, DatabaseError, Err} from "@vesta/core";
 export class DatabaseFactory {
     private static databases: {
         [protocol: string]: {
-        database: IDatabase,
-        models?: IModelCollection,
-        instance?: Database,
-        config: IDatabaseConfig
+            database: IDatabase,
+            models?: IModelCollection,
+            instance?: Database,
+            config: IDatabaseConfig
         }
     } = {};
 
@@ -27,7 +29,7 @@ export class DatabaseFactory {
                 })
             }
         } else {
-            return Promise.reject(new DatabaseError(Err.Code.DBInvalidDriver,new Error('invalid driver')));
+            return Promise.reject(new DatabaseError(Err.Code.DBInvalidDriver, new Error('invalid driver')));
         }
     }
 

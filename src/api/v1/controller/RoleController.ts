@@ -1,7 +1,9 @@
 import {NextFunction, Response, Router} from "express";
 import {BaseController, IExtRequest} from "../../BaseController";
+import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
+import {Err} from "../../../cmn/core/Err";
+import {ValidationError} from "../../../cmn/core/error/ValidationError";
 import {IRole, Role} from "../../../cmn/models/Role";
-import {DatabaseError, Err, ValidationError} from "@vesta/core";
 import {AclAction} from "../../../cmn/enum/Acl";
 
 
@@ -23,6 +25,7 @@ export class RoleController extends BaseController {
 
     public async getRoles(req: IExtRequest, res: Response, next: NextFunction) {
         let query = this.query2vql(Role, req.query);
+        delete query.limit;
         let result = await Role.find(query);
         res.json(result)
     }
@@ -34,6 +37,7 @@ export class RoleController extends BaseController {
             throw new ValidationError(validationError);
         }
         let result = await role.insert<IRole>();
+        await this.acl.initAcl();
         res.json(result)
     }
 
@@ -46,13 +50,17 @@ export class RoleController extends BaseController {
         let result = await Role.find<IRole>(role.id);
         if (result.items.length == 1) {
             // prevent updating root role
-            const {rootRoleName, guestRoleName} = this.config.security;
+            const {rootRoleName, guestRoleName, userRoleName} = this.config.security;
             if (result.items[0].name == rootRoleName) {
                 throw new Err(Err.Code.WrongInput)
             }
             // prevent changing guest role name
             if (result.items[0].name == guestRoleName) {
                 role.name = guestRoleName;
+            }
+            // prevent changing user role name
+            if (result.items[0].name == userRoleName) {
+                role.name = userRoleName;
             }
             let rResult = await role.update();
             await this.acl.initAcl();
@@ -67,11 +75,11 @@ export class RoleController extends BaseController {
         let role = new Role({id});
         let result = await Role.find<IRole>(role.id);
         if (result.items.length == 1) {
-            // prevent deleting root & guest role
-            const {rootRoleName, guestRoleName} = this.config.security;
+            // prevent deleting root & guest & user role
+            const {rootRoleName, guestRoleName, userRoleName} = this.config.security;
             let roleName = result.items[0].name;
-            if (roleName == rootRoleName || roleName == guestRoleName) {
-                throw new Err(Err.Code.WrongInput)
+            if ([rootRoleName, guestRoleName, userRoleName].indexOf(roleName) >= 0) {
+                throw new Err(Err.Code.WrongInput, 'err_default_role_delete');
             }
             let delResult = await role.remove();
             if (delResult.items.length) {

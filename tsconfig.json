@@ -5,12 +5,13 @@
     "outDir": "vesta/server/",
     "moduleResolution": "node",
     "sourceMap": true,
-    "noEmitHelpers": true
+    "noEmitHelpers": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "resources"
+    "resources/**/*"
   ]
 }

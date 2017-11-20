@@ -1,10 +1,10 @@
-import * as uuid from "node-uuid";
-import {ISessionConfig} from "../config/config";
+import {v4} from "uuid";
+import {KeyValueDatabase} from "../cmn/core/Database";
+import {Redis} from "../driver/Redis";
 import {Logger} from "../helpers/Logger";
 import {JWT} from "../helpers/JWT";
 import {Response} from "express";
-import {KeyValueDatabase} from "@vesta/core";
-import {Redis} from "@vesta/driver-redis";
+import {ISessionConfig} from "../helpers/Config";
 
 export interface ISessionData {
     payload: any;
@@ -39,13 +39,15 @@ export class Session {
             this.sessionData = {
                 payload: {},
                 meta: {
-                    id: idPrefix + uuid.v4(),
+                    id: idPrefix + v4(),
                     lastTime: now,
                     persist: persist
                 }
             }
         }
         this.sessionId = this.sessionData.meta.id;
+        // saving updated session
+        Session.db.insert(this.sessionId, JSON.stringify(this.sessionData)).catch(err => console.log(err.message));
     }
 
     public static init(config: ISessionConfig) {
@@ -87,7 +89,7 @@ export class Session {
         return Session.db.find<ISessionData>(sessionId)
             .then(data => {
                 if (data.items.length) {
-                    let session = new Session(data.items[0]);
+                    let session = new Session(<ISessionData>data.items[0]);
                     if (session.isExpired) {
                         Logger.getInstance().warn(`Session Expired {ID: "${session.sessionId}", PAYLOAD: ${JSON.stringify(session.sessionData.payload)}}`);
                         session.destroy();

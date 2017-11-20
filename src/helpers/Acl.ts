@@ -1,9 +1,10 @@
+import {IServerAppConfig} from "./Config";
 import {IRole, Role} from "../cmn/models/Role";
+import {Vql} from "../cmn/core/Vql";
+import {HLCondition} from "./HLCondition";
 import {IPermission, Permission} from "../cmn/models/Permission";
 import {populate} from "../config/db-population";
-import {IServerAppConfig} from "../config/config";
 import {AclAction, AclPolicy} from "../cmn/enum/Acl";
-import {HLCondition, Vql} from "@vesta/core";
 import {Status} from "../cmn/enum/Status";
 
 export interface IRolesList {
