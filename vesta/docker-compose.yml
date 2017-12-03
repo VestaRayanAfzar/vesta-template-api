@@ -31,8 +31,8 @@ services:
       - '9229:9229'
     volumes:
       - ../.:/app
-      - ../resources/docker/ssl:/ssl
-      - storage:/upload
+      - ../resources/ci/ssl:/ssl
+      - ./tmp/upload:/upload
       - ./tmp/log:/log
     networks:
       - network
@@ -60,7 +60,6 @@ services:
 volumes:
   session:
   database:
-  storage:
 
 networks:
   network:

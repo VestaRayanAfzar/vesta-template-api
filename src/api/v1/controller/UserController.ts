@@ -106,20 +106,8 @@ export class UserController extends BaseController {
     }
 
     public async removeUser(req: IExtRequest, res: Response) {
-        let authUser = this.getUserFromSession(req);
-        let isAdmin = this.isAdmin(authUser);
-        if (!isAdmin) {
-            throw new Err(Err.Code.Forbidden);
-        }
-        let id = isAdmin ? this.retrieveId(req.params.id) : authUser.id;
-        let user = new User({id});
-        // checking root user
-        let uResult = await User.find<IUser>(id);
-        if (uResult.items[0].username == this.config.security.rootRoleName) {
-            throw new Err(Err.Code.WrongInput);
-        }
-        let result = await user.remove();
-        res.json(result)
+        // right now, it's not possible to delete user
+        throw new Err(Err.Code.Forbidden);
     }
 
     public async upload(req: IExtRequest, res: Response) {

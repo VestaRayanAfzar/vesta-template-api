@@ -30,7 +30,7 @@ export const config: IServerAppConfig = {
         api: 'v1'
     },
     regenerateSchema: VariantConfig.regenerateSchema,
-    http2: false,
+    http2: VariantConfig.http2,
     ssl: {
         key: '/ssl/server.key',
         cert: '/ssl/server.crt'

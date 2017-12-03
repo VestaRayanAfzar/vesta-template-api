@@ -34,6 +34,7 @@ export interface ISecurityConfig {
 
 export interface IServerAppVariantConfig {
     regenerateSchema: boolean;
+    http2: boolean;
 }
 
 export interface IServerAppConfig extends IServerAppVariantConfig {
@@ -42,7 +43,6 @@ export interface IServerAppConfig extends IServerAppVariantConfig {
     version: { app: string; api: string };
     database: IDatabaseConfig;
     port: number;
-    http2?: boolean;
     ssl?: { key: string, cert: string }
     dir: {
         root: string;

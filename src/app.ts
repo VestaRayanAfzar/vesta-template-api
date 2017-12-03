@@ -6,10 +6,10 @@ import {ITextMessageConfig} from "./helpers/TextMessage";
 
 // application based configuration
 Config.set<ITextMessageConfig>('sms', {
-    host: "rest.payamak-panel.com",
-    url: "/api/SendSMS/SendSMS",
+    host: "",
+    url: "",
     username: "",
-    password: ""
+    password: "",
     number: ""
 });
 
@@ -17,6 +17,7 @@ Config.set<ITextMessageConfig>('sms', {
 const MAX_TRY_COUNT = 3;
 const TRY_INTERVAL = 5000;
 let tryCounter = 1;
+
 (async function run() {
     try {
         let server = new ServerApp(config);

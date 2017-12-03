@@ -52,6 +52,8 @@ export abstract class BaseController {
     protected getUserFromSession(req): User {
         let user = req.session.get('user');
         user = user || {role: {name: this.config.security.guestRoleName}};
+        // getting user sourceApp from POST/PUT body or GET/DELETE query
+        user.sourceApp = +(req.body.s || req.query.s);
         return new User(user);
     }
 

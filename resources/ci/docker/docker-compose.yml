@@ -56,10 +56,5 @@ services:
       - session
       - database
 
-volumes:
-  session:
-  database:
-  storage:
-
 networks:
   network:

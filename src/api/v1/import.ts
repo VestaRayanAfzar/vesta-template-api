@@ -3,6 +3,8 @@ import {IndexController} from "./controller/IndexController";
 import {PermissionController} from "./controller/PermissionController";
 import {RoleController} from "./controller/RoleController";
 import {UserController} from './controller/UserController';
+import {ContactController} from './controller/ContactController';
+import {ContextController} from './controller/ContextController';
 ///<vesta:import/>
 
 export interface IExporter {
@@ -16,6 +18,8 @@ export const exporter: IExporter = {
         permission: PermissionController,
         role: RoleController,
         user: UserController,
+        contact: ContactController,
+        context: ContextController,
         ///<vesta:expressController/>
     }
 };

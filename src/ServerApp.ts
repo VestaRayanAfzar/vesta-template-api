@@ -76,7 +76,10 @@ export class ServerApp {
     }
 
     private async initRouting(): Promise<any> {
-        this.app.use('/upl', express.static(this.config.dir.upload));
+        if (this.config.env == 'development') {
+        	// otherwise serve from nginx
+            this.app.use('/upl', express.static(this.config.dir.upload));
+        }
         this.app.use((req: IExtRequest, res, next) => {
             req.sessionDB = this.sessionDatabase;
             sessionMiddleware(req, res, next);
