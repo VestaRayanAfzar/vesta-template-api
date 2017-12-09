@@ -79,14 +79,14 @@ export abstract class BaseController {
                     return next();
                 }
             }
-            next(new Err(Err.Code.Forbidden, 'err_forbidden'));
+            next(new Err(Err.Code.Forbidden));
         }
     }
 
     protected retrieveId(req: IExtRequest): number {
         let id = +req.params.id;
         if (isNaN(id)) {
-            throw new ValidationError({id: 'number'});
+            throw new ValidationError({id: 'type'});
         }
         return id;
     }
