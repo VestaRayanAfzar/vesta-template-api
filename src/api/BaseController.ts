@@ -1,19 +1,14 @@
-import {NextFunction, Request, Response, Router} from "express";
-import {Database, KeyValueDatabase} from "../cmn/core/Database";
-import {Err} from "../cmn/core/Err";
-import {ValidationError} from "../cmn/core/error/ValidationError";
-import {IModel} from "../cmn/core/Model";
-import {IQueryRequest} from "../cmn/core/ICRUDResult";
-import {Vql} from "../cmn/core/Vql";
-import {IServerAppConfig} from "../helpers/Config";
-import {Session} from "../session/Session";
-import {IUser, User, UserType} from "../cmn/models/User";
-import {Acl} from "../helpers/Acl";
-import {IRole} from "../cmn/models/Role";
-import {Logger} from "../helpers/Logger";
+import { NextFunction, Request, Response, Router } from "express";
+import { IServerAppConfig } from "../helpers/Config";
+import { Session } from "../session/Session";
+import { LoggerFunction } from "../helpers/Logger";
+import { IUser, User, UserType } from "../cmn/models/User";
+import { Acl } from "../helpers/Acl";
+import { IRole } from "../cmn/models/Role";
+import { KeyValueDatabase, Database, ValidationError, Err, IQueryRequest, IModel, Vql } from "../medium";
 
 export interface IExtRequest extends Request {
-    log: Logger;
+    log: LoggerFunction;
     sessionDB: KeyValueDatabase;
     session: Session;
 }
@@ -49,9 +44,9 @@ export abstract class BaseController {
 
     public abstract route(router: Router): void;
 
-    protected getUserFromSession(req): User {
-        let user = req.session.get('user');
-        user = user || {role: {name: this.config.security.guestRoleName}};
+    protected getUserFromSession(req: IExtRequest): User {
+        let user = req.session.get<IUser>('user');
+        user = user || <IUser>{ role: { name: this.config.security.guestRoleName } };
         // getting user sourceApp from POST/PUT body or GET/DELETE query
         user.sourceApp = +(req.body.s || req.query.s);
         return new User(user);
@@ -86,7 +81,7 @@ export abstract class BaseController {
     protected retrieveId(req: IExtRequest): number {
         let id = +req.params.id;
         if (isNaN(id)) {
-            throw new ValidationError({id: 'type'});
+            throw new ValidationError({ id: 'type' });
         }
         return id;
     }

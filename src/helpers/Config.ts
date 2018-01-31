@@ -1,18 +1,12 @@
-import {LogLevel} from "../cmn/enum/Log";
-import {LogStorage} from "./LogFactory";
-import {IDatabaseConfig} from "../cmn/core/Database";
-import {ITextMessageConfig} from "./TextMessage";
-
-export interface IAdminConfig {
-    logLevel: number;
-    monitoring: boolean;
-    samplingInterval: number;
-}
+import { LogStorage } from "./LogFactory";
+import { LogLevel } from "../cmn/models/Log";
+import { IDatabaseConfig } from "../medium";
 
 export interface ILogConfig {
     level: LogLevel;
+    storage: LogStorage;
     dir: string;
-    storage?: LogStorage;
+    rotationInterval: number;
 }
 
 export interface ISessionConfig {
@@ -34,7 +28,6 @@ export interface ISecurityConfig {
 
 export interface IServerAppVariantConfig {
     regenerateSchema: boolean;
-    http2: boolean;
 }
 
 export interface IServerAppConfig extends IServerAppVariantConfig {
@@ -43,14 +36,11 @@ export interface IServerAppConfig extends IServerAppVariantConfig {
     version: { app: string; api: string };
     database: IDatabaseConfig;
     port: number;
-    ssl?: { key: string, cert: string }
     dir: {
         root: string;
         upload: string;
-        log: string;
     };
     security: ISecurityConfig;
-    sms?: ITextMessageConfig;
 }
 
 export class Config {

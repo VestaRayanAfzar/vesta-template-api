@@ -27,8 +27,8 @@ chmod +x resources/ci/scripts/pre-deploy.js
 print_status "Installing Node Packages"
 npm install
 print_status "Running Deploy Tasks"
-#npm run deploy
-tsc
+npm run deploy
+
 #print_status "Configuring NGINX"
 #mkdir /vesta/ssl
 #mv resources/ci/ssl /vesta/

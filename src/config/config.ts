@@ -1,40 +1,25 @@
-import {readFileSync, writeFileSync} from "fs";
-import {dirname} from "path";
-import {VariantConfig} from './config.var';
-import {IDatabaseConfig} from "../cmn/core/Database";
-import {IAdminConfig, IServerAppConfig} from "../helpers/Config";
+import { dirname } from "path";
+import { VariantConfig } from './config.var';
+import { IServerAppConfig } from "../helpers/Config";
+import { LogStorage } from "../helpers/LogFactory";
+import { IDatabaseConfig } from "../medium";
 
 let env = process.env;
-
-let adminConfig: IAdminConfig;
-try {
-    adminConfig = JSON.parse(readFileSync(__dirname + '/config.json', 'utf8'));
-} catch (err) {
-    adminConfig = {
-        logLevel: +env.LOG_LEVEL,
-        monitoring: false,
-        samplingInterval: 0
-    };
-    writeFileSync(__dirname + '/config.json', JSON.stringify(adminConfig));
-    console.error(err);
-}
 
 export const config: IServerAppConfig = {
     env: env.NODE_ENV,
     log: {
-        level: adminConfig.logLevel,
-        dir: '/log'
+        level: +env.LOG_LEVEL,
+        storage: env.NODE_ENV == 'development' ? LogStorage.Console : LogStorage.File,
+        dir: '/log',
+        // rotate log file every 3 days
+        rotationInterval: 3 * 24 * 3600000
     },
     version: {
         app: '0.1.0',
         api: 'v1'
     },
     regenerateSchema: VariantConfig.regenerateSchema,
-    http2: VariantConfig.http2,
-    ssl: {
-        key: '/ssl/server.key',
-        cert: '/ssl/server.crt'
-    },
     database: <IDatabaseConfig>{
         protocol: env.ADB_PROTOCOL,
         host: env.ADB_HOST,
@@ -46,7 +31,6 @@ export const config: IServerAppConfig = {
     dir: {
         root: dirname(__dirname),
         upload: '/upload',
-        log: '/log'
     },
     port: +env.PORT,
     security: {

@@ -1,4 +1,5 @@
-import {Condition} from "../cmn/core/Condition";
+import { Condition } from "../medium";
+
 
 export class HLCondition {
     public static and(...conditions: Array<Condition>): Condition {
@@ -37,9 +38,9 @@ export class HLCondition {
         return HLCondition.compare(Condition.Operator.Regex, filed, value, isValueOfTypeField);
     }
 
-    public static inList(filed: string, values: Array<any>, isValueOfTypeField: boolean = false){
-        let conditions:Array<Condition> = [];
-        values.forEach(value=>conditions.push(HLCondition.compare(Condition.Operator.EqualTo,filed,value,isValueOfTypeField)));
+    public static inList(filed: string, values: Array<any>, isValueOfTypeField: boolean = false) {
+        let conditions: Array<Condition> = [];
+        values.forEach(value => conditions.push(HLCondition.compare(Condition.Operator.EqualTo, filed, value, isValueOfTypeField)));
         return HLCondition.or(...conditions);
     }
 

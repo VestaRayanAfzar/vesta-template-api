@@ -1,27 +1,31 @@
-import {request} from "https";
-import {IToken, Token} from "../cmn/models/Token";
-import {Err} from "../cmn/core/Err";
-import {SourceApp} from "../cmn/models/User";
+import { request } from "https";
+import { IToken, Token } from "../cmn/models/Token";
+import { SourceApp } from "../cmn/models/User";
+import { Config } from "./Config";
+import { Err } from "../medium";
 
 export class Notification {
     private static instance: Notification;
-    private spKey = "cecb9136-c6db-46c9-96ad-b7b92bbd250f";
-    private spAuth = "ODEzOWUyMTctMGMyNS00YWFkLTlmYzQtY2E4Y2NhYjUzYzg2";
-    private euKey = "13f5cec0-2911-4f76-a26e-56daef405555";
-    private euAuth = "ZjM0NzA4NGQtNGY0NS00MGYzLWFiMzYtZjI3ODhlNDAzMmM2";
+    private euKey;
+    private euAuth;
+    private spKey;
+    private spAuth;
 
     private constructor() {
+        const notifConfig = Config.get<any>('notif');
+        this.euKey = notifConfig.euKey;
+        this.euAuth = notifConfig.euAuth;
+        this.spKey = notifConfig.spKey;
+        this.spAuth = notifConfig.spAuth;
     }
 
     private sendNotification(content: string, playerIds: Array<string>, sourceApp: SourceApp, data: any) {
         const message: any = {
             app_id: sourceApp == SourceApp.EndUser ? this.spKey : this.euKey,
-            contents: {"en": content},
+            contents: { "en": content },
             include_player_ids: playerIds
         };
-        if (data) {
-            message.data = data;
-        }
+        message.data = data || {};
         return new Promise((resolve, reject) => {
             let headers = {
                 "Content-Type": "application/json; charset=utf-8",
@@ -56,8 +60,8 @@ export class Notification {
         })
     };
 
-    public async sendMessage(user: number, message: string, sourceApp: SourceApp, data?: any) {
-        let result = await Token.find<IToken>({user: user});
+    public async sendMessage(userId: number, message: string, sourceApp: SourceApp, data?: any) {
+        let result = await Token.find<IToken>({ user: userId });
         if (!result.items.length) {
             throw new Err(Err.Code.Token);
         }

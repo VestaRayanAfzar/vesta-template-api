@@ -1,6 +1,4 @@
-import {Database, IDatabase, IDatabaseConfig, IModelCollection} from "../cmn/core/Database";
-import {DatabaseError} from "../cmn/core/error/DatabaseError";
-import {Err} from "../cmn/core/Err";
+import { IModelCollection, Database, IDatabaseConfig, IDatabase, DatabaseError, Err } from "../medium";
 
 export class DatabaseFactory {
     private static databases: {

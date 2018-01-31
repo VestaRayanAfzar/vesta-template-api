@@ -1,10 +1,8 @@
-import {NextFunction, Response, Router} from "express";
-import {BaseController, IExtRequest} from "../../BaseController";
-import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
-import {Err} from "../../../cmn/core/Err";
-import {ValidationError} from "../../../cmn/core/error/ValidationError";
-import {Context, IContext} from "../../../cmn/models/Context";
-import {AclAction} from "../../../cmn/enum/Acl";
+import { NextFunction, Response, Router } from "express";
+import { BaseController, IExtRequest } from "../../BaseController";
+import { Context, IContext } from "../../../cmn/models/Context";
+import { AclAction } from "../../../cmn/enum/Acl";
+import { ValidationError, DatabaseError, Err } from "../../../medium";
 
 export class ContextController extends BaseController {
 
@@ -26,7 +24,7 @@ export class ContextController extends BaseController {
     public async getContext(req: IExtRequest, res: Response, next: NextFunction) {
         let id = +req.params.id;
         if (isNaN(id)) {
-            throw new ValidationError({id: 'number'});
+            throw new ValidationError({ id: 'number' });
         }
         let result = await Context.find<IContext>(id);
         if (result.items.length != 1) {
@@ -68,9 +66,9 @@ export class ContextController extends BaseController {
     public async removeContext(req: IExtRequest, res: Response, next: NextFunction) {
         let id = +req.params.id;
         if (isNaN(id)) {
-            throw new ValidationError({id: 'number'});
+            throw new ValidationError({ id: 'number' });
         }
-        let context = new Context({id});
+        let context = new Context({ id });
         let result = await context.remove();
         res.json(result);
     }

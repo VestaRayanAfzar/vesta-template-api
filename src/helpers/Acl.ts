@@ -1,11 +1,11 @@
-import {IServerAppConfig} from "./Config";
-import {IRole, Role} from "../cmn/models/Role";
-import {Vql} from "../cmn/core/Vql";
-import {HLCondition} from "./HLCondition";
-import {IPermission, Permission} from "../cmn/models/Permission";
-import {populate} from "../config/db-population";
-import {AclAction, AclPolicy} from "../cmn/enum/Acl";
-import {Status} from "../cmn/enum/Status";
+import { IServerAppConfig } from "./Config";
+import { IRole, Role } from "../cmn/models/Role";
+import { HLCondition } from "./HLCondition";
+import { IPermission, Permission } from "../cmn/models/Permission";
+import { populate } from "../config/db-population";
+import { AclAction, AclPolicy } from "../cmn/enum/Acl";
+import { Status } from "../cmn/enum/Status";
+import { Vql } from "../medium";
 
 export interface IRolesList {
     [role: string]: Array<IPermission>
@@ -35,7 +35,7 @@ export class Acl {
         if (!(role in this.roles)) {
             this.roles[role] = [];
         }
-        this.roles[role].push({resource, action});
+        this.roles[role].push({ resource, action });
     }
 
     /**
@@ -110,7 +110,7 @@ export class Acl {
                     }
                 }
                 if (!found) {
-                    newPermissions.push({resource: appResource, action: appAction, status: Status.Active});
+                    newPermissions.push({ resource: appResource, action: appAction, status: Status.Active });
                 }
             }
         }

@@ -1,14 +1,12 @@
-import {NextFunction, Response, Router} from "express";
-import {BaseController, IExtRequest} from "../../BaseController";
-import {ValidationError} from "../../../cmn/core/error/ValidationError";
-import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
-import {Err} from "../../../cmn/core/Err";
-import {IQueryResult} from "../../../cmn/core/ICRUDResult";
-import {Session} from "../../../session/Session";
-import {Hashing} from "../../../helpers/Hashing";
-import {IRole, Role} from "../../../cmn/models/Role";
-import {IUser, SourceApp, User, UserType} from "../../../cmn/models/User";
-import {TextMessage} from "../../../helpers/TextMessage";
+import { NextFunction, Response, Router } from "express";
+import { Session } from "../../../session/Session";
+import { Hashing } from "../../../helpers/Hashing";
+import { IRole, Role } from "../../../cmn/models/Role";
+import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
+import { TextMessage } from "../../../helpers/TextMessage";
+import { LogLevel } from "../../../cmn/models/Log";
+import { BaseController, IExtRequest } from "../../BaseController";
+import { Err, ValidationError, DatabaseError, IQueryResult } from "../../../medium";
 
 
 export class AccountController extends BaseController {
@@ -34,17 +32,30 @@ export class AccountController extends BaseController {
             throw new ValidationError(validationError);
         }
         // checking if user exists
-        let existingUser = await User.find<IUser>({username: user.username});
-        if (existingUser.items.length == 1) {
+        let existingUser = await User.find<IUser>({ username: user.username });
+        if (existingUser.items.length > 1) {
+            // todo something goes wrong
+            for (let i = 1, il = existingUser.items.length; i < il; ++i) {
+                const tmpUser = new User(existingUser.items[i]);
+                try {
+                    await tmpUser.remove();
+                } catch (error) {
+                    req.log(LogLevel.Error, error.message, 'register', 'AccountController');
+                }
+            }
+        }
+        if (existingUser.items.length > 0) {
             userExists = true;
             user = new User(existingUser.items[0]);
-            if (!user.isOfType(UserType.User)) {
+            if (user.isOfType(UserType.User)) {
+                // throw new Err(Err.Code.Forbidden, 'err_already_registered');
+            } else {
                 user.type.push(UserType.User);
             }
         } else {
             user.type = [UserType.User];
         }
-        let role = await Role.find<IRole>({name: userRoleName});
+        let role = await Role.find<IRole>({ name: userRoleName });
         if (!role.items.length) {
             throw new Err(Err.Code.OperationFailed, 'err_no_role');
         }
@@ -72,7 +83,7 @@ export class AccountController extends BaseController {
             throw new ValidationError(validationError);
         }
         user.password = Hashing.withSalt(user.password);
-        let result = await User.find<IUser>({username: user.username, password: user.password}, {relations: ['role']});
+        let result = await User.find<IUser>({ username: user.username, password: user.password }, { relations: ['role'] });
         if (result.items.length != 1) {
             throw new Err(Err.Code.DBNoRecord);
         }
@@ -97,7 +108,7 @@ export class AccountController extends BaseController {
         Session.setAuthToken(res, session.sessionId);
         req.session = session;
         req.session.set('user', user.getValues());
-        res.json({items: [user]});
+        res.json({ items: [user] });
     }
 
     public async logout(req: IExtRequest, res: Response, next: NextFunction) {
@@ -121,9 +132,9 @@ export class AccountController extends BaseController {
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await User.find<IUser>({mobile: user.mobile});
+        let result = await User.find<IUser>({ mobile: user.mobile });
         if (result.items.length != 1) {
-            throw new ValidationError({mobile: 'invalid'});
+            throw new ValidationError({ mobile: 'invalid' });
         }
         user.setValues(result.items[0]);
         // enumeration possibility
@@ -148,17 +159,17 @@ export class AccountController extends BaseController {
         //</production>
         let user = this.getUserFromSession(req);
         if (user.id) {
-            let result = await User.find<IUser>(user.id, {relations: ['role']});
+            let result = await User.find<IUser>(user.id, { relations: ['role'] });
             result.items[0].role = this.acl.updateRolePermissions(<IRole>result.items[0].role);
             delete result.items[0].password;
             res.json(result);
         } else {
-            let {guestRoleName} = this.config.security;
+            let { guestRoleName } = this.config.security;
             let guest = <IUser>{
                 username: guestRoleName,
-                role: this.acl.updateRolePermissions({name: guestRoleName})
+                role: this.acl.updateRolePermissions({ name: guestRoleName })
             };
-            res.json(<IQueryResult<IUser>>{items: [guest]});
+            res.json(<IQueryResult<IUser>>{ items: [guest] });
         }
     }
 }

@@ -39,7 +39,6 @@ export class MySQL implements Database {
     private config: IMySQLConfig;
     private models: IModelCollection;
     private primaryKeys: { [name: string]: string } = {};
-    private transactions: { [key: number]: Connection };
     private quote = '<#quote#>';
 
     public connect(force = false): Promise<Database> {
@@ -176,10 +175,8 @@ export class MySQL implements Database {
                 result.total = result.items.length;
                 return result;
             })
-            .catch(err => {
-                if (err) {
-                    return Promise.reject(new DatabaseError(Err.Code.DBQuery, err));
-                }
+            .catch(error => {
+                return Promise.reject(new DatabaseError(Err.Code.DBQuery, error));
             })
     }
 
@@ -243,6 +240,9 @@ export class MySQL implements Database {
             .then(data => {
                 result.total = data[0]['total'];
                 return result;
+            })
+            .catch(error => {
+                return Promise.reject(new DatabaseError(Err.Code.DBQuery, error));
             })
     }
 
@@ -366,7 +366,7 @@ export class MySQL implements Database {
                 let lastId = insertResult.insertId;
                 let count = insertResult.affectedRows;
                 if (count != value.length) {
-                    throw "error in insert";
+                    throw new DatabaseError(Err.Code.DBInsert, null);
                 }
                 // for (let i = count; i--;) {
                 //     value[i][this.pk(model)] = lastId--;
@@ -395,7 +395,7 @@ export class MySQL implements Database {
                     return Promise.resolve(<IUpsertResult<M>>{items: []});
             }
         }
-        return Promise.reject(new Err(Err.Code.DBInsert, 'error in adding relation'));
+        return Promise.reject(new DatabaseError(Err.Code.DBRelation, null));
     }
 
     private removeRelation<T>(model: T, relation: string, condition?: Condition | number | Array<number>, transaction?: Transaction): Promise<any> {
@@ -425,7 +425,7 @@ export class MySQL implements Database {
                     return Promise.resolve({});
             }
         }
-        return Promise.reject(new Err(Err.Code.DBDelete, 'error in removing relation'));
+        return Promise.reject(new DatabaseError(Err.Code.DBDelete, null));
     }
 
     private updateRelations(model: Model, relation, relatedValues, transaction?: Transaction) {
@@ -1238,7 +1238,7 @@ export class MySQL implements Database {
             } else if (typeof value == 'object') {
                 id = +value[this.pk(relatedModelName)]
             }
-            if (!id || id <= 0) return Promise.reject(new Error(`invalid <<${relation}>> related model id`));
+            if (!id || id <= 0) return Promise.reject(new Err(Err.Code.DBRelation, `invalid <<${relation}>> related model id`));
             readIdPromise = Promise.resolve(id);
         }
         return readIdPromise

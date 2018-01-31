@@ -1,11 +1,9 @@
-import {NextFunction, Response, Router} from "express";
-import {BaseController, IExtRequest} from "../../BaseController";
-import {Err} from "../../../cmn/core/Err";
-import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
-import {ValidationError} from "../../../cmn/core/error/ValidationError";
-import {IToken, Token} from "../../../cmn/models/Token";
-import {AclAction} from "../../../cmn/enum/Acl";
-import {IUser} from "../../../cmn/models/User";
+import { NextFunction, Response, Router } from "express";
+import { BaseController, IExtRequest } from "../../BaseController";
+import { IToken, Token } from "../../../cmn/models/Token";
+import { AclAction } from "../../../cmn/enum/Acl";
+import { IUser } from "../../../cmn/models/User";
+import { DatabaseError, Err, ValidationError } from "../../../medium";
 
 export class TokenController extends BaseController {
 
@@ -28,7 +26,7 @@ export class TokenController extends BaseController {
         const authUser = this.getUserFromSession(req);
         const isAdmin = this.isAdmin(authUser);
         const id = this.retrieveId(req);
-        let result = await Token.find<IToken>(id, {relations: ['user']});
+        let result = await Token.find<IToken>(id, { relations: ['user'] });
         if (result.items.length != 1 || (!isAdmin && ((<IUser>result.items[0].user).id != authUser.id))) {
             throw new DatabaseError(result.items.length ? Err.Code.DBRecordCount : Err.Code.DBNoRecord, null);
         }
@@ -41,7 +39,7 @@ export class TokenController extends BaseController {
         const isAdmin = this.isAdmin(authUser);
         let query = this.query2vql(Token, req.query);
         if (!isAdmin) {
-            query.filter({user: authUser.id});
+            query.filter({ user: authUser.id });
         }
         let result = await Token.find<IToken>(query);
         for (let i = result.items.length; i--;) {
@@ -58,7 +56,7 @@ export class TokenController extends BaseController {
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await Token.find<IToken>({token: token.token, user: token.user});
+        let result = await Token.find<IToken>({ token: token.token, user: token.user });
         if (result.items.length) {
             token.id = result.items[0].id;
             let uResult = await token.update<IToken>();
@@ -75,7 +73,7 @@ export class TokenController extends BaseController {
         token.user = authUser.id;
         //
         let prevToken = req.body.prevToken;
-        let prevTokenResult = await Token.find<IToken>({token: prevToken, user: authUser.id});
+        let prevTokenResult = await Token.find<IToken>({ token: prevToken, user: authUser.id });
         if (prevTokenResult.items.length == 1) {
             let pToken = new Token(prevTokenResult.items[0]);
             await pToken.remove();
@@ -92,7 +90,7 @@ export class TokenController extends BaseController {
 
     public async removeToken(req: IExtRequest, res: Response, next: NextFunction) {
         const authUser = this.getUserFromSession(req);
-        const iToken: IToken = {user: authUser.id, token: req.params.token};
+        const iToken: IToken = { user: authUser.id, token: req.params.token };
         // todo add regex to token model for validation
         let result = await Token.find(iToken);
         if (result.items.length != 1) {

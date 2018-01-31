@@ -1,14 +1,12 @@
-import {join} from "path";
-import {Response, Router} from "express";
-import {BaseController, IExtRequest} from "../../BaseController";
-import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
-import {Err} from "../../../cmn/core/Err";
-import {ValidationError} from "../../../cmn/core/error/ValidationError";
-import {IUser, User} from "../../../cmn/models/User";
-import {FileUploader} from "../../../helpers/FileUploader";
-import {AclAction} from "../../../cmn/enum/Acl";
-import {IRole} from "../../../cmn/models/Role";
-import {Hashing} from "../../../helpers/Hashing";
+import { join } from "path";
+import { Response, Router } from "express";
+import { IUser, User } from "../../../cmn/models/User";
+import { FileUploader } from "../../../helpers/FileUploader";
+import { AclAction } from "../../../cmn/enum/Acl";
+import { IRole } from "../../../cmn/models/Role";
+import { Hashing } from "../../../helpers/Hashing";
+import { BaseController, IExtRequest } from "../../BaseController";
+import { DatabaseError, Err, ValidationError } from "../../../medium";
 
 
 export class UserController extends BaseController {
@@ -33,7 +31,7 @@ export class UserController extends BaseController {
         let authUser = this.getUserFromSession(req);
         let isAdmin = this.isAdmin(authUser);
         let id = isAdmin ? this.retrieveId(req) : authUser.id;
-        let result = await User.find<IUser>(id, {relations: ['role']});
+        let result = await User.find<IUser>(id, { relations: ['role'] });
         if (result.items.length == 1) {
             delete result.items[0].password;
             return res.json(result);
@@ -113,7 +111,7 @@ export class UserController extends BaseController {
     public async upload(req: IExtRequest, res: Response) {
         let id = +req.params.id;
         if (isNaN(id)) {
-            throw new ValidationError({id: 'number'});
+            throw new ValidationError({ id: 'number' });
         }
         let user: User;
         let destDirectory = join(this.config.dir.upload, 'user');

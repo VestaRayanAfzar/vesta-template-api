@@ -21,6 +21,7 @@
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
+    "@vesta/core": "^1.1.6",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
@@ -28,10 +29,8 @@
     "helmet": "^3.9.0",
     "jsonwebtoken": "^8.1.0",
     "mkdirp": "^0.5.1",
-    "morgan": "^1.9.0",
     "mysql": "^2.15.0",
     "redis": "^2.8.0",
-    "spdy": "^3.4.7",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
@@ -42,7 +41,6 @@
     "@types/mysql": "^2.15.0",
     "@types/node": "^8.0.47",
     "@types/redis": "^2.8.1",
-    "@types/spdy": "^3.4.4",
     "@types/uuid": "^3.4.3",
     "chalk": "^2.3.0",
     "gulp": "^3.9.1",
@@ -50,6 +48,7 @@
     "jasmine-core": "^2.8.0",
     "jasmine-node": "^1.14.5",
     "request": "^2.83.0",
+    "tslint": "^5.9.1",
     "typescript": "^2.6.1"
   }
 }

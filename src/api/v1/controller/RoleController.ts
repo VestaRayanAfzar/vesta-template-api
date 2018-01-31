@@ -1,10 +1,8 @@
-import {NextFunction, Response, Router} from "express";
-import {BaseController, IExtRequest} from "../../BaseController";
-import {DatabaseError} from "../../../cmn/core/error/DatabaseError";
-import {Err} from "../../../cmn/core/Err";
-import {ValidationError} from "../../../cmn/core/error/ValidationError";
-import {IRole, Role} from "../../../cmn/models/Role";
-import {AclAction} from "../../../cmn/enum/Acl";
+import { NextFunction, Response, Router } from "express";
+import { BaseController, IExtRequest } from "../../BaseController";
+import { IRole, Role } from "../../../cmn/models/Role";
+import { AclAction } from "../../../cmn/enum/Acl";
+import { ValidationError, Err, DatabaseError } from "../../../medium";
 
 
 export class RoleController extends BaseController {
@@ -19,7 +17,7 @@ export class RoleController extends BaseController {
 
     public async getRole(req: IExtRequest, res: Response, next: NextFunction) {
         let id = this.retrieveId(req);
-        let result = await Role.find<IRole>(id, {relations: ['permissions']});
+        let result = await Role.find<IRole>(id, { relations: ['permissions'] });
         res.json(result)
     }
 
@@ -50,7 +48,7 @@ export class RoleController extends BaseController {
         let result = await Role.find<IRole>(role.id);
         if (result.items.length == 1) {
             // prevent updating root role
-            const {rootRoleName, guestRoleName, userRoleName} = this.config.security;
+            const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
             if (result.items[0].name == rootRoleName) {
                 throw new Err(Err.Code.WrongInput)
             }
@@ -72,11 +70,11 @@ export class RoleController extends BaseController {
 
     public async removeRole(req: IExtRequest, res: Response, next: NextFunction) {
         let id = this.retrieveId(req);
-        let role = new Role({id});
+        let role = new Role({ id });
         let result = await Role.find<IRole>(role.id);
         if (result.items.length == 1) {
             // prevent deleting root & guest & user role
-            const {rootRoleName, guestRoleName, userRoleName} = this.config.security;
+            const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
             let roleName = result.items[0].name;
             if ([rootRoleName, guestRoleName, userRoleName].indexOf(roleName) >= 0) {
                 throw new Err(Err.Code.WrongInput, 'err_default_role_delete');

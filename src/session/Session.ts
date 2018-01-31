@@ -1,10 +1,9 @@
-import {v4} from "uuid";
-import {KeyValueDatabase} from "../cmn/core/Database";
-import {Redis} from "../driver/Redis";
-import {Logger} from "../helpers/Logger";
-import {JWT} from "../helpers/JWT";
-import {Response} from "express";
-import {ISessionConfig} from "../helpers/Config";
+import { v4 } from "uuid";
+import { Redis } from "../driver/Redis";
+import { JWT } from "../helpers/JWT";
+import { Response } from "express";
+import { ISessionConfig } from "../helpers/Config";
+import { KeyValueDatabase } from "../medium";
 
 export interface ISessionData {
     payload: any;
@@ -24,7 +23,7 @@ export class Session {
     public sessionData: ISessionData;
 
     constructor(data: ISessionData, persist?: boolean) {
-        let {maxAge, idPrefix} = Session.config;
+        let { maxAge, idPrefix } = Session.config;
         let now = Date.now();
         if (data) {
             // restoring session
@@ -91,7 +90,6 @@ export class Session {
                 if (data.items.length) {
                     let session = new Session(<ISessionData>data.items[0]);
                     if (session.isExpired) {
-                        Logger.getInstance().warn(`Session Expired {ID: "${session.sessionId}", PAYLOAD: ${JSON.stringify(session.sessionData.payload)}}`);
                         session.destroy();
                         return null;
                     }
@@ -102,7 +100,7 @@ export class Session {
     }
 
     public static setAuthToken(res: Response, sessionId: string, token?: string) {
-        token = token || JWT.sign({sessionId});
+        token = token || JWT.sign({ sessionId });
         res.set('X-Auth-Token', token);
     }
 }

@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as formidable from "formidable";
-import {Files} from "formidable";
-import {Err} from "../cmn/core/Err";
-import {config} from "../config/config";
-import {Hashing} from "./Hashing";
-import {IExtRequest} from "../api/BaseController";
+import { Files } from "formidable";
+import { config } from "../config/config";
+import { Hashing } from "./Hashing";
+import { IExtRequest } from "../api/BaseController";
+import { Err } from "../medium";
 
 let mkdirp = require('mkdirp');
 
@@ -66,7 +66,7 @@ export class FileUploader<T> {
     private rename(srcFileName: string, destFileName: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             fs.rename(srcFileName, destFileName, (error) => {
-                return error ? reject({error}) : resolve(true);
+                return error ? reject({ error }) : resolve(true);
             });
         });
     }
