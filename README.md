@@ -20,8 +20,8 @@ All your data will be erased if this value is set to `true`.
 
 *Do NOT forget to change this value to false to prevent data loss*
 
-To start the server first you have to run `dev:api` from NPM tasks.
-Now your project is ready to be executed by docker. Just run `docker-compose up` from `vesta` directory.
+To start the server first you have to run `npm run dev`.
+Now your project is ready to be executed by docker. Just run `docker-compose up -d` within `vesta` directory.
 The server will be listening on port `3000` (of course you can change it from docker-compose.yml in `vesta` directory) 
 at your docker-machine address.
 You can use [vesta](https://github.com/VestaRayanAfzar/vesta) code generator to create new models and controllers.

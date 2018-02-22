@@ -7,7 +7,6 @@ try {
     const packageContent = JSON.parse(fs.readFileSync(packagePath, {encoding: 'utf8'}).toString());
     const packagesToRemove = [];
     const devPackagesToRemove = [
-        "chalk",
         "gulp-develop-server",
         "jasmine-core",
         "jasmine-node",

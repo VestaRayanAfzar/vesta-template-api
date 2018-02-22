@@ -1,0 +1,17 @@
+{
+    "extends": [
+        "tslint:recommended"
+    ],
+    "rules": {
+        "jsx-alignment": false,
+        "jsx-boolean-value": "never",
+        "jsx-wrap-multiline": false,
+        "array-type": [
+            true,
+            "generic"
+        ],
+        "triple-equals": false,
+        "no-empty-interface": false,
+        "comment-format": false
+    }
+}

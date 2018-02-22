@@ -1,8 +1,5 @@
-import {createClient, RedisClient} from "redis";
-import {IDatabaseConfig, KeyValueDatabase} from "../cmn/core/Database";
-import {IDeleteResult, IQueryResult, IUpsertResult} from "../cmn/core/ICRUDResult";
-import {DatabaseError} from "../cmn/core/error/DatabaseError";
-import {Err} from "../cmn/core/Err";
+import { createClient, RedisClient } from "redis";
+import { IDatabaseConfig, KeyValueDatabase, IDeleteResult, IQueryResult, IUpsertResult, DatabaseError, Err } from "../medium";
 
 export class Redis implements KeyValueDatabase {
     private connection: RedisClient;

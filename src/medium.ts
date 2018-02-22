@@ -24,4 +24,12 @@ export {
     IDatabaseConfig,
     IDatabase,
     Condition,
+    IQueryOption,
+    ISchemaList,
+    Transaction,
+    IDeleteResult,
+    IUpsertResult,
+    IModelFields,
+    IFieldProperties,
+    RelationType,
 } from "@vesta/core";

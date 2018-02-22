@@ -1,20 +1,19 @@
-import {Connection, ConnectionConfig, createPool, Pool, PoolConnection} from "mysql";
+import { Connection, ConnectionConfig, createPool, Pool, PoolConnection } from "mysql";
 import {
     Database,
     IDatabaseConfig,
     IModelCollection,
     IQueryOption,
     ISchemaList,
-    Transaction
-} from "../cmn/core/Database";
-import {DatabaseError} from "../cmn/core/error/DatabaseError";
-import {Err} from "../cmn/core/Err";
-import {Vql} from "../cmn/core/Vql";
-import {Condition} from "../cmn/core/Condition";
-import {IDeleteResult, IQueryResult, IUpsertResult} from "../cmn/core/ICRUDResult";
-import {Field, FieldType, IFieldProperties, RelationType} from "../cmn/core/Field";
-import {IModelFields, Model} from "../cmn/core/Model";
-import {Schema} from "../cmn/core/Schema";
+    Transaction,
+    Err,
+    DatabaseError,
+    Vql, Condition,
+    IDeleteResult, IQueryResult, IUpsertResult,
+    IModelFields, Model,
+    Field, FieldType, IFieldProperties, RelationType,
+    Schema
+} from "../medium";
 
 interface ICalculatedQueryOptions {
     limit: string,
@@ -330,7 +329,7 @@ export class MySQL implements Database {
         let insertList = [];
         let pk = this.pk(model);
         for (let field in fields) {
-            if (fields.hasOwnProperty(field) && fields[field].properties.type != FieldType.Relation || fields[field].properties.relation.type == RelationType.One2Many || fields[field].properties.relation.type == RelationType.One2One) {
+            if (fields.hasOwnProperty(field) && fields[field].properties.type != FieldType.Relation || fields[field].properties.relation.type == RelationType.One2Many) {
                 // escape primary key with empty value
                 if (field != pk || value[0][pk]) {
                     fieldsName.push(field);
@@ -387,7 +386,6 @@ export class MySQL implements Database {
         if (fields[relation] && fields[relation].properties.type == FieldType.Relation && value) {
             switch (fields[relation].properties.relation.type) {
                 case RelationType.One2Many:
-                case RelationType.One2One:
                     return this.addOneToManyRelation(model, relation, value, transaction);
                 case RelationType.Many2Many:
                     return this.addManyToManyRelation(model, relation, value, transaction);
@@ -417,7 +415,6 @@ export class MySQL implements Database {
         if (fields[relation] && fields[relation].properties.type == FieldType.Relation) {
             switch (fields[relation].properties.relation.type) {
                 case RelationType.One2Many:
-                case RelationType.One2One:
                     return this.removeOneToManyRelation(model, relation, transaction);
                 case RelationType.Many2Many:
                     return this.removeManyToManyRelation(model, relation, safeCondition, transaction);
@@ -482,7 +479,6 @@ export class MySQL implements Database {
                 if (!relationValue && (relationValue !== 0)) continue;
                 switch (modelFields[relation].properties.relation.type) {
                     case RelationType.One2Many:
-                    case RelationType.One2One:
                         let fk = +relationValue;
                         if (!fk && 'object' == typeof relationValue) {
                             let relatedModelName = modelFields[relation].properties.relation.model.schema.name;
@@ -646,7 +642,7 @@ export class MySQL implements Database {
 
     private getQueryParams(query: Vql, alias: string = query.model): ICalculatedQueryOptions {
         let params: ICalculatedQueryOptions = <ICalculatedQueryOptions>{};
-        query.offset = query.offset ? query.offset : (query.page ? query.page - 1 : 0 ) * query.limit;
+        query.offset = query.offset ? query.offset : (query.page ? query.page - 1 : 0) * query.limit;
         params.limit = '';
         if (+query.limit) {
             params.limit = `LIMIT ${query.offset ? +query.offset : 0 }, ${+query.limit} `;
@@ -680,8 +676,7 @@ export class MySQL implements Database {
                     if (modelFields[key].properties.type != FieldType.Relation) {
                         fields.push(`\`${alias}\`.${modelFields[key].fieldName}`);
                     }
-                    else if ((!query.relations || query.relations.indexOf(modelFields[key].fieldName) < 0)
-                        && (modelFields[key].properties.relation.type == RelationType.One2Many || modelFields[key].properties.relation.type == RelationType.One2One)) {
+                    else if ((!query.relations || query.relations.indexOf(modelFields[key].fieldName) < 0) && (modelFields[key].properties.relation.type == RelationType.One2Many)) {
                         fields.push(`\`${alias}\`.${modelFields[key].fieldName}`);
                     }
                 }
@@ -696,7 +691,7 @@ export class MySQL implements Database {
             }
             let properties = field.properties;
             if (properties.type == FieldType.Relation) {
-                if (properties.relation.type == RelationType.One2Many || properties.relation.type == RelationType.One2One) {
+                if (properties.relation.type == RelationType.One2Many) {
                     let modelFiledList = [];
                     let filedNameList = properties.relation.model.schema.getFieldsNames();
                     let relatedModelFields = properties.relation.model.schema.getFields();
@@ -704,7 +699,7 @@ export class MySQL implements Database {
 
                         if (typeof query.relations[i] == 'string' || query.relations[i]['fields'].indexOf(filedNameList[j]) >= 0) {
                             if (relatedModelFields[filedNameList[j]].properties.type != FieldType.List && (relatedModelFields[filedNameList[j]].properties.type != FieldType.Relation ||
-                                    (relatedModelFields[filedNameList[j]].properties.relation.type == RelationType.One2One || relatedModelFields[filedNameList[j]].properties.relation.type == RelationType.One2Many))) {
+                                    relatedModelFields[filedNameList[j]].properties.relation.type == RelationType.One2Many)) {
                                 modelFiledList.push(`'${this.quote}${filedNameList[j]}${this.quote}:','${this.quote}',COALESCE(c.${filedNameList[j]},''),'${this.quote}'`)
                             }
                         }
@@ -816,7 +811,7 @@ export class MySQL implements Database {
                     relations.push(this.runRelatedQuery(query, i, ids, transaction))
                 } else if (relationship.type == RelationType.Reverse) {
                     let reverseField = this.getReverseRelation(query, field);
-                    if (reverseField.properties.relation.type == RelationType.One2Many || reverseField.properties.relation.type == RelationType.One2One) {
+                    if (reverseField.properties.relation.type == RelationType.One2Many) {
                         relations.push(this.runReverseQueryOne2Many(query, i, ids, reverseField, transaction));
                     } else if (reverseField.properties.relation.type == RelationType.Many2Many) {
                         relations.push(this.runRelatedQueryMany2Many(query, i, ids, reverseField, transaction));
@@ -997,8 +992,7 @@ export class MySQL implements Database {
                 if (list[i].hasOwnProperty(key) &&
                     fields.hasOwnProperty(key) && (fields[key].properties.type == FieldType.Object || (
                         fields[key].properties.type == FieldType.Relation &&
-                        (fields[key].properties.relation.type == RelationType.One2Many
-                            || fields[key].properties.relation.type == RelationType.One2One)))) {
+                        (fields[key].properties.relation.type == RelationType.One2Many)))) {
                     list[i][key] = this.parseJson(list[i][key], fields[key].properties.type == FieldType.Object);
                 } else if (list[i].hasOwnProperty(key) && !fields.hasOwnProperty(key)) {
                     let isObject = list[i][key] && list[i][key].indexOf && list[i][key].indexOf(this.quote) < 0;
@@ -1133,7 +1127,7 @@ export class MySQL implements Database {
             return '';
         }
         let defaultRelation;
-        if (properties.relation && (properties.relation.type == RelationType.One2One || properties.relation.type == RelationType.One2Many)) {
+        if (properties.relation && (properties.relation.type == RelationType.One2Many)) {
             defaultRelation = true;
         }
         let defaultValue = properties.type != FieldType.Boolean ? `'${defaultRelation ? 0 : properties.default}'` : !!properties.default;
@@ -1179,7 +1173,7 @@ export class MySQL implements Database {
                 typeSyntax = 'BIGINT';
                 break;
             case FieldType.Relation:
-                if (properties.relation.type == RelationType.One2One || properties.relation.type == RelationType.One2Many) {
+                if (properties.relation.type == RelationType.One2Many) {
                     typeSyntax = 'BIGINT';
                 }
                 break;

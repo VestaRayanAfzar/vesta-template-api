@@ -12,11 +12,11 @@ import { Err, ValidationError, DatabaseError, IQueryResult } from "../../../medi
 export class AccountController extends BaseController {
 
     public route(router: Router) {
-        router.get('/me', this.wrap(this.getMe));
-        router.post('/account', this.checkAcl('account', 'register'), this.wrap(this.register));
-        router.post('/account/login', this.checkAcl('account', 'login'), this.wrap(this.login));
-        router.post('/account/forget', this.checkAcl('account', 'forget'), this.wrap(this.forget));
-        router.get('/account/logout', this.checkAcl('account', 'logout'), this.wrap(this.logout));
+        router.get("/me", this.wrap(this.getMe));
+        router.post("/account", this.checkAcl("account", "register"), this.wrap(this.register));
+        router.post("/account/login", this.checkAcl("account", "login"), this.wrap(this.login));
+        router.post("/account/forget", this.checkAcl("account", "forget"), this.wrap(this.forget));
+        router.get("/account/logout", this.checkAcl("account", "logout"), this.wrap(this.logout));
     }
 
     public async register(req: IExtRequest, res: Response, next: NextFunction) {
