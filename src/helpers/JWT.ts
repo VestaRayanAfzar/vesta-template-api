@@ -1,30 +1,31 @@
-import {config} from "../config/config";
 import * as jwt from "jsonwebtoken";
-import {SignOptions, VerifyOptions, VerifyCallback} from "jsonwebtoken";
+import { SignOptions, VerifyCallback, VerifyOptions } from "jsonwebtoken";
+import { config } from "../config/config";
 
-let security = config.security;
+const security = config.security;
 
 export class JWT {
 
-    static sign(payload: any): string {
-        let secretOrPrivateKey = security.secret,
-            options: SignOptions = {
-                algorithm: security.session.hashing
-            };
+    public static sign(payload: any): string {
+        const secretOrPrivateKey = security.secret;
+        const options: SignOptions = {
+            algorithm: security.session.hashing,
+        };
         try {
             return jwt.sign(payload, secretOrPrivateKey, options);
         } catch (e) {
-            console.error('jwt sign failed', e);
+            // tslint:disable-next-line:no-console
+            console.error("jwt sign failed", e);
             return null;
         }
     }
 
-    static verify(token: string, callback: VerifyCallback) {
-        let secretOrPrivateKey = security.secret,
-            options: VerifyOptions = {
-                algorithms: [security.session.hashing],
-                ignoreExpiration: true
-            };
+    public static verify(token: string, callback: VerifyCallback) {
+        const secretOrPrivateKey = security.secret;
+        const options: VerifyOptions = {
+            algorithms: [security.session.hashing],
+            ignoreExpiration: true,
+        };
         try {
             jwt.verify(token, secretOrPrivateKey, options, callback);
         } catch (e) {

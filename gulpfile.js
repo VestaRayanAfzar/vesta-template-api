@@ -11,23 +11,26 @@ const dir = {
     buildServer: path.join(root, 'vesta/server'),
 };
 
-const debug = {type: 'inspect', ports: {debug: 5858, inspect: 9229}, address: '192.168.99.100'};
+/**
+ * in case of using docker toolbox change the address for updated inspector url,
+ * otherwise use chrome developer console for connecting to inspector
+ */
+const debug = {address: null, port: 9229};
 
 /**
  * This tasks is called by npm script for starting api server in docker env
  */
 gulp.task('api', function () {
     let delay = 500, debuggerDelay = 500, timer, debuggerTimer;
-    let port = debug.ports[debug.type];
-    server.listen({path: `${dir.buildServer}/app.js`, execArgv: [`--${debug.type}=0.0.0.0:${port}`]});
-    let isInspect = debug.type === 'inspect';
-    isInspect && loadDebugger();
+    const {address, port} = debug;
+    server.listen({path: `${dir.buildServer}/app.js`, execArgv: [`--inspect=0.0.0.0:${port}`]});
+    address && loadDebugger();
     gulp.watch([`${dir.buildServer}/**/*.js`], () => {
         clearTimeout(timer);
         clearTimeout(debuggerTimer);
         timer = setTimeout(() => {
             server.restart();
-            isInspect && loadDebugger();
+            address && loadDebugger();
         }, delay);
     });
 
@@ -35,7 +38,8 @@ gulp.task('api', function () {
         debuggerTimer = setTimeout(launchInspector, debuggerDelay);
 
         function launchInspector() {
-            http.get(`http://${debug.address}:${debug.ports.inspect}/json`, res => {
+            const {address, port} = debug;
+            http.get(`http://${address}:${port}/json`, res => {
                 res.setEncoding('utf8');
                 let rawData = '';
                 res.on('data', chunk => {
@@ -44,8 +48,8 @@ gulp.task('api', function () {
                 res.on('end', () => {
                     let data = JSON.parse(rawData);
                     let url = data[0]['devtoolsFrontendUrl'];
-                    let regex = new RegExp(`&ws=[^:]+:${debug.ports.inspect}\/`);
-                    url = url.replace(regex, `&ws=${debug.address}:${debug.ports.inspect}/`);
+                    let regex = new RegExp(`&ws=[^:]+:${port}\/`);
+                    url = url.replace(regex, `&ws=${address}:${port}/`);
                     process.stdout.write(`\n\nInspect URL: \n${url}\n\n`);
                 })
             }).on('error', err => process.stderr.write(err.message));

@@ -1,6 +1,6 @@
-import { LogStorage } from "./LogFactory";
 import { LogLevel } from "../cmn/models/Log";
 import { IDatabaseConfig } from "../medium";
+import { LogStorage } from "./LogFactory";
 
 export interface ILogConfig {
     level: LogLevel;
@@ -13,7 +13,7 @@ export interface ISessionConfig {
     maxAge: number;
     idPrefix: string;
     hashing: string;
-    database: IDatabaseConfig
+    database: IDatabaseConfig;
 }
 
 export interface ISecurityConfig {
@@ -26,6 +26,11 @@ export interface ISecurityConfig {
     session: ISessionConfig;
 }
 
+export interface IDirConfig {
+    root: string;
+    upload: string;
+}
+
 export interface IServerAppVariantConfig {
     regenerateSchema: boolean;
 }
@@ -36,23 +41,14 @@ export interface IServerAppConfig extends IServerAppVariantConfig {
     version: { app: string; api: string };
     database: IDatabaseConfig;
     port: number;
-    dir: {
-        root: string;
-        upload: string;
-    };
+    dir: IDirConfig;
     security: ISecurityConfig;
 }
 
 export class Config {
-    private static config: IServerAppConfig;
-    private static storage: any = {};
 
     public static init(config: IServerAppConfig) {
         Config.config = config;
-    }
-
-    public static set<T>(key: string, value: T) {
-        Config.storage[key] = value;
     }
 
     public static get<T>(key: string, defaultValue?: T) {
@@ -68,4 +64,11 @@ export class Config {
     public static getConfig(): IServerAppConfig {
         return Config.config;
     }
+
+    public static set<T>(key: string, value: T) {
+        Config.storage[key] = value;
+    }
+
+    private static config: IServerAppConfig;
+    private static storage: any = {};
 }

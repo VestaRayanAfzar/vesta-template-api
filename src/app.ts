@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-import {config} from "./config/config";
-import {ServerApp} from "./ServerApp";
-import {Config} from "./helpers/Config";
-import {ITextMessageConfig} from "./helpers/TextMessage";
+import { config } from "./config/config";
+import { Config } from "./helpers/Config";
+import { ITextMessageConfig } from "./helpers/TextMessage";
+import { ServerApp } from "./ServerApp";
 
 // application based configuration
-Config.set<ITextMessageConfig>('sms', {
+Config.set<ITextMessageConfig>("sms", {
     host: "",
+    number: "",
+    password: "",
     url: "",
     username: "",
-    password: "",
-    number: ""
 });
 
 // initiating server
@@ -20,23 +20,28 @@ let tryCounter = 1;
 
 (async function run() {
     try {
-        let server = new ServerApp(config);
+        const server = new ServerApp(config);
         await server.init();
         await server.start();
-        console.log('Server booted at ', new Date().toString());
+        // tslint:disable-next-line:no-console
+        console.log(`Server booted at ${new Date().toString()}`);
     } catch (err) {
         ++tryCounter;
-        console.error('Server initiation error: ', err);
+        // tslint:disable-next-line:no-console
+        console.error("Server initiation error: ", err);
         if (tryCounter <= MAX_TRY_COUNT) {
             // increasing the interval in case of repetitive errors
-            let nextTryInterval = TRY_INTERVAL * tryCounter;
+            const nextTryInterval = TRY_INTERVAL * tryCounter;
+            // tslint:disable-next-line:no-console
             console.warn(`A retry effort will occurred in ${nextTryInterval / 1000}s`);
             setTimeout(async () => {
+                // tslint:disable-next-line:no-console
                 console.warn(`Restarting server initiation process [try #${tryCounter}]...`);
                 await run();
             }, nextTryInterval);
         } else {
-            console.error('MAX_TRY_COUNT reached; exiting server...');
+            // tslint:disable-next-line:no-console
+            console.error("MAX_TRY_COUNT reached; exiting server...");
             process.exit(1);
         }
     }

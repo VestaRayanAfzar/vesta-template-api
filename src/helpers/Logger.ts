@@ -1,15 +1,7 @@
 import {LogFactory} from "./LogFactory";
-import {ILog, LogLevel} from "../cmn/models/Log";
-import {IUser, SourceApp} from "../cmn/models/User";
-
-export interface ILogger {
-    start: number;
-    duration: number;
-    level: number;
-    user: number | IUser;
-    sourceApp: SourceApp;
-    logs: Array<ILog>;
-}
+import {LogLevel} from "../cmn/models/Log";
+import {SourceApp} from "../cmn/models/User";
+import {ILogger} from "../cmn/interfaces/Log";
 
 export interface LoggerFunction {
     (level: LogLevel, message: string, method?: string, file?: string): void;

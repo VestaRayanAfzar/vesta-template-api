@@ -10,6 +10,9 @@ import { Err, ValidationError, DatabaseError, IQueryResult } from "../../../medi
 
 
 export class AccountController extends BaseController {
+    private message = {
+        password: "کلمه ورود شما: ",
+    };
 
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
@@ -19,7 +22,7 @@ export class AccountController extends BaseController {
         router.get("/account/logout", this.checkAcl("account", "logout"), this.wrap(this.logout));
     }
 
-    public async register(req: IExtRequest, res: Response, next: NextFunction) {
+    private async register(req: IExtRequest, res: Response, next: NextFunction) {
         let userExists = false;
         const sourceApp = req.body.s;
         if (sourceApp != SourceApp.EndUser) {
@@ -40,7 +43,7 @@ export class AccountController extends BaseController {
                 try {
                     await tmpUser.remove();
                 } catch (error) {
-                    req.log(LogLevel.Error, error.message, 'register', 'AccountController');
+                    req.log(LogLevel.Error, error.message, "register", "AccountController");
                 }
             }
         }
@@ -55,24 +58,24 @@ export class AccountController extends BaseController {
         } else {
             user.type = [UserType.User];
         }
-        let role = await Role.find<IRole>({ name: userRoleName });
+        const role = await Role.find<IRole>({ name: userRoleName });
         if (!role.items.length) {
-            throw new Err(Err.Code.OperationFailed, 'err_no_role');
+            throw new Err(Err.Code.OperationFailed, "err_no_role");
         }
         user.role = role.items[0].id;
         // generating password for new user
         const randomNumber = Hashing.randomInt();
         user.password = Hashing.withSalt(`${randomNumber}`);
-        let result = userExists ? await user.update<IUser>() : await user.insert<IUser>();
+        const result = userExists ? await user.update<IUser>() : await user.insert<IUser>();
         // sending sms
-        let sms = await TextMessage.getInstance().sendMessage(`Enter this code: ${randomNumber}`, user.mobile);
+        const sms = await TextMessage.getInstance().sendMessage(`${this.message.password}${randomNumber}`, user.mobile);
         if (sms.RetStatus === 1) {
             return res.json({});
         }
-        throw new Err(Err.Code.OperationFailed, 'err_sms');
+        throw new Err(Err.Code.OperationFailed, "err_sms");
     }
 
-    public async login(req: IExtRequest, res: Response, next: NextFunction) {
+    private async login(req: IExtRequest, res: Response, next: NextFunction) {
         const sourceApp = req.body.s;
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.WrongInput);
@@ -87,13 +90,13 @@ export class AccountController extends BaseController {
         if (result.items.length != 1) {
             throw new Err(Err.Code.DBNoRecord);
         }
-        result.items[0].role = this.acl.updateRolePermissions(<IRole>result.items[0].role);
+        result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
         user.setValues(result.items[0]);
         user.sourceApp = sourceApp;
         delete user.password;
         // prevent admin from logging into application
-        if (user.sourceApp != SourceApp.Panel && this.isAdmin(user)) {
-            throw new Err(Err.Code.Forbidden, 'err_admin_login');
+        if (this.isAdmin(user) && user.sourceApp != SourceApp.Panel) {
+            throw new Err(Err.Code.Forbidden, "err_admin_login");
         }
         // prevent other users from logging into panel
         if (user.sourceApp == SourceApp.Panel && !user.isOfType(UserType.Admin)) {
@@ -104,42 +107,43 @@ export class AccountController extends BaseController {
             throw new Err(Err.Code.Forbidden, 'err_none_user_login');
         }
         req.session.destroy();
-        let session = await Session.create(req.body.rememberMe);
+        const session = await Session.create(req.body.rememberMe);
         Session.setAuthToken(res, session.sessionId);
         req.session = session;
-        req.session.set('user', user.getValues());
+        req.session.set("user", user.getValues());
         res.json({ items: [user] });
     }
 
-    public async logout(req: IExtRequest, res: Response, next: NextFunction) {
-        let result = await User.find<IUser>(this.getUserFromSession(req).id);
+    private async logout(req: IExtRequest, res: Response, next: NextFunction) {
+        const result = await User.find<IUser>(this.getUserFromSession(req).id);
         if (result.items.length != 1) {
             throw new DatabaseError(Err.Code.DBNoRecord, null);
         }
         req.session.destroy();
-        let session = await Session.create();
+        const session = await Session.create();
         Session.setAuthToken(res, session.sessionId);
         await this.getMe(req, res, next);
     }
 
-    public async forget(req: IExtRequest, res: Response, next: NextFunction) {
+    private async forget(req: IExtRequest, res: Response, next: NextFunction) {
         const sourceApp = req.body.s;
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.Forbidden);
         }
-        let user = new User(req.body);
-        let validationError = user.validate('mobile');
+        const user = new User(req.body);
+        const validationError = user.validate("mobile");
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await User.find<IUser>({ mobile: user.mobile });
+        const result = await User.find<IUser>({ mobile: user.mobile });
         if (result.items.length != 1) {
-            throw new ValidationError({ mobile: 'invalid' });
+            throw new ValidationError({ mobile: "invalid" });
         }
         user.setValues(result.items[0]);
         // enumeration possibility
         const randomNumber = Hashing.randomInt();
-        let sms = await TextMessage.getInstance().sendMessage(`Enter this code: ${randomNumber}`, result.items[0].mobile);
+        const sms = await TextMessage.getInstance()
+            .sendMessage(`${this.message.password}${randomNumber}`, result.items[0].mobile);
         if (sms.RetStatus === 1) {
             // updating user password
             user.password = Hashing.withSalt(`${randomNumber}`);
@@ -147,29 +151,29 @@ export class AccountController extends BaseController {
             return res.json({});
         }
         // todo: something goes wrong
-        throw new Err(Err.Code.OperationFailed, 'err_sms');
+        throw new Err(Err.Code.OperationFailed, "err_sms");
     }
 
-    public async getMe(req: IExtRequest, res: Response, next: NextFunction) {
+    private async getMe(req: IExtRequest, res: Response, next: NextFunction) {
         //<production>
         const sourceApp = +req.query.s;
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
-            throw new Err(Err.Code.WrongInput);
+            throw new Err(Err.Code.Forbidden, null, "getMe", "AccountController");
         }
         //</production>
-        let user = this.getUserFromSession(req);
+        const user = this.getUserFromSession(req);
         if (user.id) {
-            let result = await User.find<IUser>(user.id, { relations: ['role'] });
-            result.items[0].role = this.acl.updateRolePermissions(<IRole>result.items[0].role);
+            const result = await User.find<IUser>(user.id, { relations: ["role"] });
+            result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
             delete result.items[0].password;
             res.json(result);
         } else {
-            let { guestRoleName } = this.config.security;
-            let guest = <IUser>{
+            const { guestRoleName } = this.config.security;
+            const guest = {
+                role: this.acl.updateRolePermissions({ name: guestRoleName }),
                 username: guestRoleName,
-                role: this.acl.updateRolePermissions({ name: guestRoleName })
-            };
-            res.json(<IQueryResult<IUser>>{ items: [guest] });
+            } as IUser;
+            res.json({ items: [guest] } as IQueryResult<IUser>);
         }
     }
 }

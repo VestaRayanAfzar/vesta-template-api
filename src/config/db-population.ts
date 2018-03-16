@@ -12,6 +12,7 @@ export async function populate() {
     const pResult = await Permission.find<IPermission>({ resource: "*", action: "*" });
     let role = new Role({ name: rootRoleName, desc: "Root role", permissions: [pResult.items[0].id] });
     let rInsert = await role.insert<IRole>();
+    // tslint:disable-next-line:max-line-length
     const root = new User({ type: [UserType.Admin], username: rootRoleName, password: Hashing.withSalt("to0r4L!fe"), role: rInsert.items[0].id });
     await root.insert();
     // guest Role
@@ -21,6 +22,7 @@ export async function populate() {
         await Permission.find<IPermission>({ resource: "support", action: AclAction.Add }),
         await Permission.find<IPermission>({ resource: "context", action: AclAction.Read }),
     ];
+    // tslint:disable-next-line:max-line-length
     role = new Role({ name: guestRoleName, desc: "Guest role", permissions: guestPermissions.map((item) => item.items[0].id) });
     await role.insert();
     // user Role & test user
@@ -31,8 +33,10 @@ export async function populate() {
         await Permission.find<IPermission>({ resource: "user", action: AclAction.Read }),
         await Permission.find<IPermission>({ resource: "user", action: AclAction.Edit }),
     ];
+    // tslint:disable-next-line:max-line-length
     role = new Role({ name: userRoleName, desc: "User role", permissions: userPermissions.map((item) => item.items[0].id) });
     rInsert = await role.insert<IRole>();
+    // tslint:disable-next-line:max-line-length
     const test = new User({ type: [UserType.User], username: "test", password: Hashing.withSalt("to0r4L!fe"), role: rInsert.items[0].id });
     await test.insert();
 }

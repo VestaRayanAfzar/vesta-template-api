@@ -1,38 +1,37 @@
-import { join } from "path";
 import { Response, Router } from "express";
-import { IUser, User } from "../../../cmn/models/User";
-import { FileUploader } from "../../../helpers/FileUploader";
+import { join } from "path";
 import { AclAction } from "../../../cmn/enum/Acl";
 import { IRole } from "../../../cmn/models/Role";
+import { IUser, User } from "../../../cmn/models/User";
+import { FileUploader } from "../../../helpers/FileUploader";
 import { Hashing } from "../../../helpers/Hashing";
+import { DatabaseError, Err, sanitizePhoneNumber, ValidationError } from "../../../medium";
 import { BaseController, IExtRequest } from "../../BaseController";
-import { DatabaseError, Err, ValidationError } from "../../../medium";
-
 
 export class UserController extends BaseController {
 
     public route(router: Router) {
-        router.get('/user/count', this.checkAcl('user', AclAction.Read), this.wrap(this.getUserCount));
-        router.get('/user/:id', this.checkAcl('user', AclAction.Read), this.wrap(this.getUser));
-        router.get('/user', this.checkAcl('user', AclAction.Read), this.wrap(this.getUsers));
-        router.post('/user', this.checkAcl('user', AclAction.Add), this.wrap(this.addUser));
-        router.put('/user', this.checkAcl('user', AclAction.Edit), this.wrap(this.updateUser));
-        router.delete('/user/:id', this.checkAcl('user', AclAction.Delete), this.wrap(this.removeUser));
-        router.post('/user/file/:id', this.checkAcl('user', AclAction.Edit), this.wrap(this.upload));
+        router.get("/user/count", this.checkAcl("user", AclAction.Read), this.wrap(this.getUserCount));
+        router.get("/user/:id", this.checkAcl("user", AclAction.Read), this.wrap(this.getUser));
+        router.get("/user", this.checkAcl("user", AclAction.Read), this.wrap(this.getUsers));
+        router.post("/user", this.checkAcl("user", AclAction.Add), this.wrap(this.addUser));
+        router.put("/user", this.checkAcl("user", AclAction.Edit), this.wrap(this.updateUser));
+        router.delete("/user/:id", this.checkAcl("user", AclAction.Delete), this.wrap(this.removeUser));
+        router.post("/user/file/:id", this.checkAcl("user", AclAction.Edit), this.wrap(this.upload));
     }
 
     public async getUserCount(req: IExtRequest, res: Response) {
-        let query = this.query2vql(User, req.query, true);
-        let result = await User.count(query);
-        res.json(result)
+        const query = this.query2vql(User, req.query, true);
+        const result = await User.count(query);
+        res.json(result);
     }
 
     public async getUser(req: IExtRequest, res: Response) {
-        let authUser = this.getUserFromSession(req);
-        let isAdmin = this.isAdmin(authUser);
-        let id = isAdmin ? this.retrieveId(req) : authUser.id;
-        let result = await User.find<IUser>(id, { relations: ['role'] });
-        if (result.items.length == 1) {
+        const authUser = this.getUserFromSession(req);
+        const isAdmin = this.isAdmin(authUser);
+        const id = isAdmin ? this.retrieveId(req) : authUser.id;
+        const result = await User.find<IUser>(id, { relations: ["role"] });
+        if (result.items.length === 1) {
             delete result.items[0].password;
             return res.json(result);
         }
@@ -40,13 +39,13 @@ export class UserController extends BaseController {
     }
 
     public async getUsers(req: IExtRequest, res: Response) {
-        let authUser = this.getUserFromSession(req);
-        let isAdmin = this.isAdmin(authUser);
+        const authUser = this.getUserFromSession(req);
+        const isAdmin = this.isAdmin(authUser);
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
         }
-        let query = this.query2vql(User, req.query, false, true);
-        let result = await User.find<IUser>(query);
+        const query = this.query2vql(User, req.query, false, true);
+        const result = await User.find<IUser>(query);
         for (let i = result.items.length; i--;) {
             delete result.items[i].password;
         }
@@ -54,32 +53,34 @@ export class UserController extends BaseController {
     }
 
     public async addUser(req: IExtRequest, res: Response) {
-        let authUser = this.getUserFromSession(req);
-        let isAdmin = this.isAdmin(authUser);
+        const authUser = this.getUserFromSession(req);
+        const isAdmin = this.isAdmin(authUser);
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
         }
-        let user = new User(req.body);
-        let validationError = user.validate();
+        const user = new User(req.body);
+        user.mobile = sanitizePhoneNumber(user.mobile);
+        const validationError = user.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
         user.password = Hashing.withSalt(user.password);
-        let result = await user.insert<IUser>();
+        const result = await user.insert<IUser>();
         delete result.items[0].password;
-        res.json(result)
+        res.json(result);
     }
 
     public async updateUser(req: IExtRequest, res: Response) {
-        let authUser = this.getUserFromSession(req);
-        let isAdmin = this.isAdmin(authUser);
-        let user = new User(req.body);
+        const authUser = this.getUserFromSession(req);
+        const isAdmin = this.isAdmin(authUser);
+        const user = new User(req.body);
+        user.mobile = sanitizePhoneNumber(user.mobile);
         if (!isAdmin) {
             user.id = authUser.id;
-            user.role = +(<IRole>authUser.role).id;
+            user.role = +(authUser.role as IRole).id;
             user.type = authUser.type;
         }
-        let validationError = user.validate();
+        const validationError = user.validate();
         if (validationError) {
             // user may not wanna update the password
             if (!user.password) {
@@ -93,9 +94,9 @@ export class UserController extends BaseController {
         if (user.password) {
             user.password = Hashing.withSalt(user.password);
         }
-        let result = await User.find<IUser>(user.id);
-        if (result.items.length == 1) {
-            let uResult = await user.update<IUser>();
+        const result = await User.find<IUser>(user.id);
+        if (result.items.length === 1) {
+            const uResult = await user.update<IUser>();
             delete uResult.items[0].password;
             res.json(uResult);
         } else {
@@ -109,23 +110,21 @@ export class UserController extends BaseController {
     }
 
     public async upload(req: IExtRequest, res: Response) {
-        let id = +req.params.id;
-        if (isNaN(id)) {
-            throw new ValidationError({ id: 'number' });
-        }
+        const id = this.retrieveId(req);
         let user: User;
-        let destDirectory = join(this.config.dir.upload, 'user');
-        let result = await User.find<IUser>(id);
-        if (result.items.length != 1) {
+        const destDirectory = join(this.config.dir.upload, "user");
+        const result = await User.find<IUser>(id);
+        if (result.items.length !== 1) {
             throw new Err(Err.Code.WrongInput);
         }
         user = new User(result.items[0]);
-        let uploader = new FileUploader<IUser>(destDirectory);
-        let upl = await uploader.upload(req);
-        let oldFileName = user.image;
+        const uploader = new FileUploader<IUser>(true);
+        await uploader.parse(req);
+        const upl = await uploader.upload(destDirectory);
+        const oldFileName = user.image;
         user.image = upl.image;
         await FileUploader.checkAndDeleteFile(`${destDirectory}/${oldFileName}`);
-        let uResult = await user.update<IUser>();
+        const uResult = await user.update<IUser>();
         delete uResult.items[0].password;
         res.json(uResult);
     }
