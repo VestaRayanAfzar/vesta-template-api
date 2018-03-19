@@ -10,7 +10,7 @@ export {
     Database,
     Field,
     FieldType,
-    HLCondition,
+    Hlc,
     IQueryRequest,
     DateTime,
     sanitizePhoneNumber,

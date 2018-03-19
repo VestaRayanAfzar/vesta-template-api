@@ -4,7 +4,7 @@ import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
 import { populate } from "../config/db-population";
 import { Vql } from "../medium";
-import { HLCondition } from "../medium";
+import { Hlc as C } from "../medium";
 import { IServerAppConfig } from "./Config";
 
 export interface IRolesList {
@@ -100,8 +100,8 @@ export class Acl {
             }
         }
         if (deprecatedPermissions.length) {
-            const conditions = deprecatedPermissions.map((id) => HLCondition.eq("id", id));
-            updateOperations.push(Permission.remove(HLCondition.or(...conditions)));
+            const conditions = deprecatedPermissions.map((id) => C.eq("id", id));
+            updateOperations.push(Permission.remove(C.or(...conditions)));
         }
         // waiting for operations to finish
         if (updateOperations.length) {
