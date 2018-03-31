@@ -21,8 +21,8 @@
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
-    "@vesta/core": "^1.1.6",
-    "@vesta/driver-mysql": "^1.0.5",
+    "@vesta/core": "^1.1.8",
+    "@vesta/driver-mysql": "^1.0.6",
     "@vesta/driver-redis": "^1.0.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
