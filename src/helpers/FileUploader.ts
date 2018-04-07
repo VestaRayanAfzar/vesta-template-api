@@ -3,8 +3,9 @@ import { access, rename, unlink } from "fs";
 import * as mkdirp from "mkdirp";
 import { join, parse } from "path";
 import { IExtRequest } from "../api/BaseController";
+import { IDirConfig } from "../config/appConfig";
 import { Err } from "../medium";
-import { Config, IDirConfig } from "./Config";
+import { Config } from "./Config";
 import { Hashing } from "./Hashing";
 
 export class FileUploader<T> {

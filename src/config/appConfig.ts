@@ -1,12 +1,52 @@
 import { dirname } from "path";
-import { IServerAppConfig } from "../helpers/Config";
+import { cmnConfig, ICmnConfig } from "../cmn/config/cmnConfig";
+import { LogLevel } from "../cmn/models/Log";
 import { LogStorage } from "../helpers/LogFactory";
 import { IDatabaseConfig } from "../medium";
-import { VariantConfig } from "./config.var";
+import { IVariantConfig, variantConfig } from "./variantConfig";
+
+export interface ILogConfig {
+    level: LogLevel;
+    storage: LogStorage;
+    dir: string;
+    rotationInterval: number;
+}
+
+export interface ISessionConfig {
+    maxAge: number;
+    idPrefix: string;
+    hashing: string;
+    database: IDatabaseConfig;
+}
+
+export interface ISecurityConfig {
+    secret: string;
+    salt: string;
+    hashing: string;
+    guestRoleName: string;
+    rootRoleName: string;
+    userRoleName: string;
+    session: ISessionConfig;
+}
+
+export interface IDirConfig {
+    root: string;
+    upload: string;
+}
+
+export interface IAppConfig extends IVariantConfig, ICmnConfig {
+    env: string;
+    log: ILogConfig;
+    version: { app: string; api: string };
+    database: IDatabaseConfig;
+    port: number;
+    dir: IDirConfig;
+    security: ISecurityConfig;
+}
 
 const env = process.env;
 
-export const config: IServerAppConfig = {
+export const appConfig: IAppConfig = {
     database: {
         database: env.ADB_NAME,
         host: env.ADB_HOST,
@@ -20,6 +60,7 @@ export const config: IServerAppConfig = {
         upload: "/upload",
     },
     env: env.NODE_ENV,
+    locale: cmnConfig.locale,
     log: {
         dir: "/log",
         level: +env.LOG_LEVEL,
@@ -27,8 +68,9 @@ export const config: IServerAppConfig = {
         rotationInterval: 3 * 24 * 3600000,
         storage: env.NODE_ENV === "development" ? LogStorage.Console : LogStorage.File,
     },
+    name: cmnConfig.name,
     port: +env.PORT,
-    regenerateSchema: VariantConfig.regenerateSchema,
+    regenerateSchema: variantConfig.regenerateSchema,
     security: {
         guestRoleName: "guest",
         hashing: "sha256",
@@ -47,8 +89,5 @@ export const config: IServerAppConfig = {
         },
         userRoleName: "user",
     },
-    version: {
-        api: "v1",
-        app: "0.1.0",
-    },
+    version: cmnConfig.version,
 };

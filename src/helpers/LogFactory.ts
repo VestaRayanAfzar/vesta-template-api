@@ -2,7 +2,7 @@ import { appendFile, existsSync, writeFileSync } from "fs";
 import { ILogger } from "../cmn/interfaces/Log";
 import { ILog } from "../cmn/models/Log";
 import { SourceApp } from "../cmn/models/User";
-import { ILogConfig } from "./Config";
+import { ILogConfig } from "../config/appConfig";
 import { Logger } from "./Logger";
 
 export const enum LogStorage { Console = 1, File }

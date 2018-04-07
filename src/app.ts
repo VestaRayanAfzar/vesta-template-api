@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { config } from "./config/config";
+import { appConfig } from "./config/appConfig";
 import { Config } from "./helpers/Config";
 import { ITextMessageConfig } from "./helpers/TextMessage";
 import { ServerApp } from "./ServerApp";
 
+Config.init(appConfig);
 // application based configuration
 Config.set<ITextMessageConfig>("sms", {
     host: "",
@@ -20,7 +21,7 @@ let tryCounter = 1;
 
 (async function run() {
     try {
-        const server = new ServerApp(config);
+        const server = new ServerApp(appConfig);
         await server.init();
         await server.start();
         // tslint:disable-next-line:no-console

@@ -74,7 +74,7 @@ export class UserController extends BaseController {
         const authUser = this.getUserFromSession(req);
         const isAdmin = this.isAdmin(authUser);
         const user = new User(req.body);
-        user.mobile = sanitizePhoneNumber(user.mobile);
+        user.mobile = user.mobile ? sanitizePhoneNumber(user.mobile) : null;
         if (!isAdmin) {
             user.id = authUser.id;
             user.role = +(authUser.role as IRole).id;
@@ -123,7 +123,9 @@ export class UserController extends BaseController {
         const upl = await uploader.upload(destDirectory);
         const oldFileName = user.image;
         user.image = upl.image;
-        await FileUploader.checkAndDeleteFile(`${destDirectory}/${oldFileName}`);
+        if (oldFileName) {
+            await FileUploader.checkAndDeleteFile(`${destDirectory}/${oldFileName}`);
+        }
         const uResult = await user.update<IUser>();
         delete uResult.items[0].password;
         res.json(uResult);

@@ -1,8 +1,8 @@
 import * as jwt from "jsonwebtoken";
 import { SignOptions, VerifyCallback, VerifyOptions } from "jsonwebtoken";
-import { config } from "../config/config";
+import { appConfig } from "../config/appConfig";
 
-const security = config.security;
+const security = appConfig.security;
 
 export class JWT {
 

@@ -10,8 +10,8 @@ import { ApiFactory } from "./api/ApiFactory";
 import { IExtRequest } from "./api/BaseController";
 import { AclPolicy } from "./cmn/enum/Acl";
 import { LogLevel } from "./cmn/models/Log";
+import { IAppConfig } from "./config/appConfig";
 import { Acl } from "./helpers/Acl";
-import { IServerAppConfig } from "./helpers/Config";
 import { DatabaseFactory } from "./helpers/DatabaseFactory";
 import { LogFactory } from "./helpers/LogFactory";
 import { loggerMiddleware } from "./middlewares/logger";
@@ -25,7 +25,7 @@ export class ServerApp {
     private database: Database;
     private acl: Acl;
 
-    constructor(private config: IServerAppConfig) {
+    constructor(private config: IAppConfig) {
         this.app = express();
         this.server = createServer(this.app);
         // tslint:disable-next-line:no-console

@@ -2,10 +2,9 @@ import { AclAction, AclPolicy } from "../cmn/enum/Acl";
 import { Status } from "../cmn/enum/Status";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
+import { IAppConfig } from "../config/appConfig";
 import { populate } from "../config/db-population";
-import { Vql } from "../medium";
-import { Hlc as C } from "../medium";
-import { IServerAppConfig } from "./Config";
+import { Hlc as C, Vql } from "../medium";
 
 export interface IRolesList {
     [role: string]: IPermission[];
@@ -23,7 +22,7 @@ export class Acl {
     /** This is the {roleName: [IPermission]}, a collection of all roles */
     private roles: IRolesList = {};
 
-    constructor(private config: IServerAppConfig, private defaultPolicy: AclPolicy) {
+    constructor(private config: IAppConfig, private defaultPolicy: AclPolicy) {
     }
 
     /**

@@ -1,53 +1,8 @@
-import { LogLevel } from "../cmn/models/Log";
-import { IDatabaseConfig } from "../medium";
-import { LogStorage } from "./LogFactory";
-
-export interface ILogConfig {
-    level: LogLevel;
-    storage: LogStorage;
-    dir: string;
-    rotationInterval: number;
-}
-
-export interface ISessionConfig {
-    maxAge: number;
-    idPrefix: string;
-    hashing: string;
-    database: IDatabaseConfig;
-}
-
-export interface ISecurityConfig {
-    secret: string;
-    salt: string;
-    hashing: string;
-    guestRoleName: string;
-    rootRoleName: string;
-    userRoleName: string;
-    session: ISessionConfig;
-}
-
-export interface IDirConfig {
-    root: string;
-    upload: string;
-}
-
-export interface IServerAppVariantConfig {
-    regenerateSchema: boolean;
-}
-
-export interface IServerAppConfig extends IServerAppVariantConfig {
-    env: string;
-    log: ILogConfig;
-    version: { app: string; api: string };
-    database: IDatabaseConfig;
-    port: number;
-    dir: IDirConfig;
-    security: ISecurityConfig;
-}
+import { IAppConfig } from "../config/appConfig";
 
 export class Config {
 
-    public static init(config: IServerAppConfig) {
+    public static init(config: IAppConfig) {
         Config.config = config;
     }
 
@@ -61,7 +16,7 @@ export class Config {
         return defaultValue;
     }
 
-    public static getConfig(): IServerAppConfig {
+    public static getConfig(): IAppConfig {
         return Config.config;
     }
 
@@ -69,6 +24,6 @@ export class Config {
         Config.storage[key] = value;
     }
 
-    private static config: IServerAppConfig;
+    private static config: IAppConfig;
     private static storage: any = {};
 }

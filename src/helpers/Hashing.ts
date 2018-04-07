@@ -1,10 +1,10 @@
 import * as crypto from "crypto";
-import {config} from "../config/config";
+import { appConfig } from "../config/appConfig";
 
 export class Hashing {
 
     public static withSalt(password: string): string {
-        const {hashing, salt} = config.security;
+        const { hashing, salt } = appConfig.security;
         const hash = crypto.createHash(hashing);
         const saltedPassword = password.length % 2 === 0 ? (salt + password) : (password + salt);
         return hash.update(saltedPassword).digest("hex");
@@ -16,7 +16,7 @@ export class Hashing {
     }
 
     public static simple(text: string) {
-        const hash = crypto.createHash(config.security.hashing);
+        const hash = crypto.createHash(appConfig.security.hashing);
         return hash.update(text).digest("hex");
     }
 

@@ -4,10 +4,10 @@ import { IRole, Role } from "../cmn/models/Role";
 import { User, UserType } from "../cmn/models/User";
 import { Hashing } from "../helpers/Hashing";
 import { IQueryResult } from "../medium";
-import { config } from "./config";
+import { appConfig } from "./appConfig";
 
 export async function populate() {
-    const { rootRoleName, guestRoleName, userRoleName } = config.security;
+    const { rootRoleName, guestRoleName, userRoleName } = appConfig.security;
     // root Role & User
     const pResult = await Permission.find<IPermission>({ resource: "*", action: "*" });
     let role = new Role({ name: rootRoleName, desc: "Root role", permissions: [pResult.items[0].id] });
