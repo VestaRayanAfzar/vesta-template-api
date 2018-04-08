@@ -1,6 +1,6 @@
 # Vesta
 
-An api server (Node Express) template from [Vesta Rayan Afzar](http://vestarayanafzar.com)
+An api server (Node Express) template from [Vesta Rayan Afzar](https://vestarayanafzar.com)
 
 This template is written in typescript.
 
@@ -14,7 +14,7 @@ Do NOT clone this repository directly, use [Vesta](https://github.com/VestaRayan
 use `vesta create --help` for more information 
 
 ### Development
-Set `regenerateSchema` value to `true` from `src/config/config.var.ts`, for the first time to create the necessary tables.
+Set `regenerateSchema` value to `true` from `src/config/variantConfig.ts`, for the first time to create the necessary tables.
 Also after adding new models you have to change this to `true` to update database.
 All your data will be erased if this value is set to `true`.
 
@@ -28,7 +28,7 @@ You can use [vesta](https://github.com/VestaRayanAfzar/vesta) code generator to 
 Use `vesta gen --help` for more information.
  
 ### Production
-Production mode configuration file is located at `resources/gitignore/config.var.ts`.
+Production mode configuration file is located at `resources/gitignore/variantConfig.ts`.
 There is a bash script in `resources/ci/deploy.sh` (change it to cover your needs).
 `docker-compose.yml` for production mode is located at `resources/ci/docker/` which you can modify to cover your circumstances.
 On target system (production) you have to install [vesta](https://github.com/VestaRayanAfzar/vesta) platform. Then run `vesta deploy [https://git/repo.git]`.
