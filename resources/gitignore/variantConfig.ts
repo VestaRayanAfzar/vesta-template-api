@@ -1,7 +1,7 @@
-export interface IServerAppVariantConfig {
+export interface IVariantConfig {
     regenerateSchema: boolean;
 }
 
-export const variantConfig: IServerAppVariantConfig = {
+export const variantConfig: IVariantConfig = {
     regenerateSchema: false,
 };
