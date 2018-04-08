@@ -18,7 +18,7 @@ print_status "Cloning SubModules"
 git checkout master
 git submodule update --init src/cmn
 git submodule foreach git checkout master
-mv resources/gitignore/config.var.ts src/config/config.var.ts
+mv resources/gitignore/variantConfig.ts src/config/variantConfig.ts
 
 print_status "Executing pre-deploy Script"
 chmod +x resources/ci/scripts/pre-deploy.js
