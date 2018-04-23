@@ -16,15 +16,11 @@ export class Notification {
     private static instance: Notification;
     private euKey;
     private euAuth;
-    private spKey;
-    private spAuth;
 
     private constructor() {
         const notifConfig = Config.get<any>("notif");
         this.euKey = notifConfig.euKey;
         this.euAuth = notifConfig.euAuth;
-        this.spKey = notifConfig.spKey;
-        this.spAuth = notifConfig.spAuth;
     }
 
     public async sendMessage(userId: number, message: string, sourceApp: SourceApp, data?: any) {
@@ -38,14 +34,14 @@ export class Notification {
 
     private sendNotification(content: string, playerIds: string[], sourceApp: SourceApp, data: any) {
         const message: any = {
-            app_id: sourceApp === SourceApp.EndUser ? this.spKey : this.euKey,
+            app_id: this.euKey,
             contents: { en: content },
             include_player_ids: playerIds,
         };
         message.data = data || {};
         return new Promise((resolve, reject) => {
             const headers = {
-                "Authorization": `Basic ${sourceApp === SourceApp.EndUser ? this.spAuth : this.euAuth}`,
+                "Authorization": `Basic ${this.euAuth}`,
                 "Content-Type": "application/json; charset=utf-8",
             };
 
