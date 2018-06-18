@@ -1,10 +1,10 @@
+import { Err } from "@vesta/core";
 import { Files, IncomingForm } from "formidable";
 import { access, rename, unlink } from "fs";
 import * as mkdirp from "mkdirp";
 import { join, parse } from "path";
 import { IExtRequest } from "../api/BaseController";
 import { IDirConfig } from "../config/appConfig";
-import { Err } from "../medium";
 import { Config } from "./Config";
 import { Hashing } from "./Hashing";
 
@@ -12,11 +12,11 @@ export class FileUploader<T> {
 
     public static async checkAndDeleteFile(filePath: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            access(filePath, (exists) => {
-                if (exists) {
-                    return unlink(filePath, async (error) => error ? reject(error) : resolve(filePath));
+            access(filePath, (accError) => {
+                if (accError) {
+                    reject(accError);
                 }
-                resolve(filePath);
+                    return unlink(filePath, async (error) => error ? reject(error) : resolve(filePath));
             });
         });
     }

@@ -6,27 +6,27 @@ import { IDatabaseConfig } from "../medium";
 import { IVariantConfig, variantConfig } from "./variantConfig";
 
 export interface ILogConfig {
-    level: LogLevel;
-    storage: LogStorage;
     dir: string;
+    level: LogLevel;
     rotationInterval: number;
+    storage: LogStorage;
 }
 
 export interface ISessionConfig {
-    maxAge: number;
-    idPrefix: string;
-    hashing: string;
     database: IDatabaseConfig;
+    hashing: string;
+    idPrefix: string;
+    maxAge: number;
 }
 
 export interface ISecurityConfig {
-    secret: string;
-    salt: string;
-    hashing: string;
     guestRoleName: string;
+    hashing: string;
     rootRoleName: string;
-    userRoleName: string;
+    salt: string;
+    secret: string;
     session: ISessionConfig;
+    userRoleName: string;
 }
 
 export interface IDirConfig {
@@ -35,13 +35,16 @@ export interface IDirConfig {
 }
 
 export interface IAppConfig extends IVariantConfig, ICmnConfig {
+    database: IDatabaseConfig;
+    dir: IDirConfig;
     env: string;
     log: ILogConfig;
-    version: { app: string; api: string };
-    database: IDatabaseConfig;
     port: number;
-    dir: IDirConfig;
     security: ISecurityConfig;
+    version: {
+        api: string;
+        app: string;
+    };
 }
 
 const env = process.env;

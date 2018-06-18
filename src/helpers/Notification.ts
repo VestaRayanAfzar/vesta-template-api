@@ -1,7 +1,7 @@
+import { Err } from "@vesta/core";
 import { request } from "https";
 import { IToken, Token } from "../cmn/models/Token";
 import { SourceApp } from "../cmn/models/User";
-import { Err } from "../medium";
 import { Config } from "./Config";
 
 export class Notification {

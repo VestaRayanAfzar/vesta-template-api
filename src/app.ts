@@ -5,6 +5,7 @@ import { ITextMessageConfig } from "./helpers/TextMessage";
 import { ServerApp } from "./ServerApp";
 
 Config.init(appConfig);
+// Culture.register(IrLocale, IrVocabs, IrDate);
 // application based configuration
 Config.set<ITextMessageConfig>("sms", {
     host: "",

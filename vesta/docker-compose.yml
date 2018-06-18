@@ -12,7 +12,7 @@ services:
       - network
 
   database:
-    image: mysql
+    image: mysql:5.7.22
     ports:
       - '3306:3306'
     volumes:
@@ -27,7 +27,6 @@ services:
     image: node
     ports:
       - '3000:3000'
-      - '5858:5858'
       - '9229:9229'
     volumes:
       - ../.:/app

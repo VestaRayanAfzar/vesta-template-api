@@ -4,10 +4,8 @@
 npm-debug*
 /resources/tsd
 /resources/log
-/src/config/config.var.ts
 /src/config/variantConfig.ts
 tsd-debug*
 /vesta/server/*
 !/vesta/server/docker-compose.yml
 /vesta/tmp
-yarn-error*

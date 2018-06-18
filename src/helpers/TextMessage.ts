@@ -1,5 +1,6 @@
 import { request, RequestOptions } from "http";
 import { stringify } from "querystring";
+import { IUser, User } from "../cmn/models/User";
 import { Config } from "./Config";
 
 export interface ITextMessageConfig {
@@ -28,7 +29,13 @@ export class TextMessage {
     constructor(private config: ITextMessageConfig) {
     }
 
-    public async sendMessage(text: string, to: string): Promise<ITextMessageResult> {
+    public async sendTo(userId: number, message: string): Promise<ITextMessageResult> {
+        const user = await User.find<IUser>(userId);
+        if (!user.items.length) { return null; }
+        return this.sendMessage(user.items[0].mobile, message);
+    }
+
+    public async sendMessage(to: string, text: string): Promise<ITextMessageResult> {
         const { username, password, number } = this.config;
         return new Promise<ITextMessageResult>((resolve, reject) => {
             const req = request(this.getReqOptions(), (res) => {

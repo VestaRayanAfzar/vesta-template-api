@@ -1,4 +1,4 @@
-import { Database, DatabaseError, Err, IDatabase, IDatabaseConfig, IModelCollection } from "../medium";
+import { Database, DatabaseError, Err, IDatabase, IDatabaseConfig, IModelCollection } from "@vesta/core";
 
 interface IDatabaseConnectionInstance {
     config: IDatabaseConfig;

@@ -5,7 +5,7 @@ import * as cors from "cors";
 import * as express from "express";
 import { readdirSync } from "fs";
 import * as helmet from "helmet";
-import { createServer, Server } from "http";
+import { Server, createServer } from "http";
 import { ApiFactory } from "./api/ApiFactory";
 import { IExtRequest } from "./api/BaseController";
 import { AclPolicy } from "./cmn/enum/Acl";
@@ -51,7 +51,6 @@ export class ServerApp {
                 .on("listening", (arg) => resolve(arg))
                 .on("error", (err) => resolve(err));
         });
-
     }
 
     private configExpressServer() {
@@ -106,7 +105,7 @@ export class ServerApp {
         //
         process.on("unhandledRejection", (reason) => {
             // tslint:disable-next-line:no-console
-            console.error(`Unhandled Rejection at: ${reason}`);
+            console.error("Unhandled Rejection:", reason);
         });
     }
 
