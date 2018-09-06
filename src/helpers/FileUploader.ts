@@ -16,7 +16,7 @@ export class FileUploader<T> {
                 if (accError) {
                     reject(accError);
                 }
-                    return unlink(filePath, async (error) => error ? reject(error) : resolve(filePath));
+                return unlink(filePath, async (error) => error ? reject(error) : resolve(filePath));
             });
         });
     }

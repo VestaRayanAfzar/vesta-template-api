@@ -1,12 +1,12 @@
 import { AccountController } from "./controller/AccountController";
+import { ContextController } from "./controller/ContextController";
 import { IndexController } from "./controller/IndexController";
+import { LogController } from "./controller/LogController";
 import { PermissionController } from "./controller/PermissionController";
 import { RoleController } from "./controller/RoleController";
-import { UserController } from './controller/UserController';
-import { SupportController } from './controller/SupportController';
-import { ContextController } from './controller/ContextController';
-import { LogController } from './controller/LogController';
-///<vesta:import/>
+import { SupportController } from "./controller/SupportController";
+import { UserController } from "./controller/UserController";
+/// <vesta:import/>
 
 export interface IExporter {
     controller: any;
@@ -15,13 +15,13 @@ export interface IExporter {
 export const exporter: IExporter = {
     controller: {
         account: AccountController,
+        context: ContextController,
         index: IndexController,
+        log: LogController,
         permission: PermissionController,
         role: RoleController,
-        user: UserController,
         support: SupportController,
-        context: ContextController,
-        log: LogController,
-        ///<vesta:expressController/>
-    }
+        user: UserController,
+        /// <vesta:expressController/>
+    },
 };

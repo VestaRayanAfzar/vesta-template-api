@@ -2,9 +2,9 @@ import { AclAction, AclPolicy } from "../cmn/enum/Acl";
 import { Status } from "../cmn/enum/Status";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
+import { IAppConfig } from "../config/appConfig";
 import { populate } from "../config/db-population";
 import { Hlc as C, Vql } from "../medium";
-import { IAppConfig } from "../config/appConfig";
 
 export interface IRolesList {
     [role: string]: IPermission[];

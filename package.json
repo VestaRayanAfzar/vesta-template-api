@@ -1,6 +1,6 @@
 {
   "name": "vesta-template-api",
-  "version": "0.8.0",
+  "version": "0.8.3",
   "description": "Vesta boilerplate for applications backend",
   "license": "Apache-2.0",
   "author": "hbtb <bishehsary@gmail.com>",
@@ -21,7 +21,7 @@
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
-    "@vesta/core": "^1.1.8",
+    "@vesta/core": "^1.1.9",
     "@vesta/culture-ir": "^0.2.3",
     "@vesta/driver-mysql": "^1.0.11",
     "@vesta/driver-redis": "^1.0.0",
@@ -29,27 +29,27 @@
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "formidable": "^1.2.1",
-    "helmet": "^3.12.1",
-    "jsonwebtoken": "^8.2.2",
+    "helmet": "^3.13.0",
+    "jsonwebtoken": "^8.3.0",
     "mkdirp": "^0.5.1",
-    "mysql": "^2.15.0",
+    "mysql": "^2.16.0",
     "redis": "^2.8.0",
-    "uuid": "^3.2.1"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
-    "@types/express": "^4.11.1",
+    "@types/express": "^4.16.0",
     "@types/formidable": "^1.0.31",
-    "@types/jsonwebtoken": "^7.2.7",
+    "@types/jsonwebtoken": "^7.2.8",
     "@types/mkdirp": "^0.5.2",
     "@types/mysql": "^2.15.5",
-    "@types/node": "^10.3.0",
+    "@types/node": "^10.9.4",
     "@types/redis": "^2.8.6",
-    "@types/uuid": "^3.4.3",
-    "gulp": "^4.0.0",
+    "@types/uuid": "^3.4.4",
+    "gulp": "^3.9.1",
     "gulp-develop-server": "^0.5.2",
-    "request": "^2.87.0",
-    "tslint": "^5.10.0",
-    "typescript": "^2.9.1"
+    "request": "^2.88.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.3"
   }
 }

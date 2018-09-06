@@ -4,40 +4,41 @@ import { AclAction } from "../../../cmn/enum/Acl";
 import { IPermission, Permission } from "../../../cmn/models/Permission";
 import { BaseController, IExtRequest } from "../../BaseController";
 
-
 export class PermissionController extends BaseController {
 
     public route(router: Router) {
-        router.get('/acl/permission/:id', this.checkAcl('acl.permission', AclAction.Read), this.wrap(this.getPermission));
-        router.get('/acl/permission', this.checkAcl('acl.permission', AclAction.Read), this.wrap(this.getPermissions));
-        router.put('/acl/permission', this.checkAcl('acl.permission', AclAction.Edit), this.wrap(this.updatePermission));
+        // tslint:disable-next-line:max-line-length
+        router.get("/acl/permission/:id", this.checkAcl("acl.permission", AclAction.Read), this.wrap(this.getPermission));
+        router.get("/acl/permission", this.checkAcl("acl.permission", AclAction.Read), this.wrap(this.getPermissions));
+        // tslint:disable-next-line:max-line-length
+        router.put("/acl/permission", this.checkAcl("acl.permission", AclAction.Edit), this.wrap(this.updatePermission));
     }
 
     public async getPermission(req: IExtRequest, res: Response, next: NextFunction) {
-        let id = this.retrieveId(req);
-        let result = await Permission.find<IPermission>(id);
+        const id = this.retrieveId(req);
+        const result = await Permission.find<IPermission>(id);
         res.json(result);
     }
 
     public async getPermissions(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = this.query2vql(Permission, req.query, false, true);
+        const query = this.query2vql(Permission, req.query, false, true);
         // removing limit
         delete query.limit;
-        let result = await Permission.find(query);
+        const result = await Permission.find(query);
         res.json(result);
     }
 
     public async updatePermission(req: IExtRequest, res: Response, next: NextFunction) {
-        let permission = new Permission(req.body);
-        let validationError = permission.validate();
+        const permission = new Permission(req.body);
+        const validationError = permission.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await Permission.find<IPermission>(permission.id);
-        if (result.items.length == 1) {
+        const result = await Permission.find<IPermission>(permission.id);
+        if (result.items.length === 1) {
             result.items[0].status = permission.status;
             permission.setValues(result.items[0]);
-            let pResult = await permission.update();
+            const pResult = await permission.update();
             await this.acl.initAcl();
             res.json(pResult);
         } else {

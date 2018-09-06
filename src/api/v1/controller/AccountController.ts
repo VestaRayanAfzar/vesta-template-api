@@ -24,17 +24,17 @@ export class AccountController extends BaseController {
     private async register(req: IExtRequest, res: Response, next: NextFunction) {
         let userExists = false;
         const sourceApp = req.body.s;
-        if (sourceApp != SourceApp.EndUser) {
+        if (sourceApp !== SourceApp.EndUser) {
             throw new Err(Err.Code.Forbidden);
         }
         const userRoleName = this.config.security.userRoleName;
         let user = new User(req.body);
-        let validationError = user.validate('username', 'password');
+        const validationError = user.validate("username", "password");
         if (validationError) {
             throw new ValidationError(validationError);
         }
         // checking if user exists
-        let existingUser = await User.find<IUser>({ username: user.username });
+        const existingUser = await User.find<IUser>({ username: user.username });
         if (existingUser.items.length > 1) {
             // todo something goes wrong
             for (let i = 1, il = existingUser.items.length; i < il; ++i) {
@@ -50,11 +50,12 @@ export class AccountController extends BaseController {
             userExists = true;
             user = new User(existingUser.items[0]);
             if (user.isOfType(UserType.User)) {
-                // throw new Err(Err.Code.Forbidden, 'err_already_registered');
+                throw new Err(Err.Code.Forbidden, "err_already_registered");
             } else {
                 user.type.push(UserType.User);
             }
         } else {
+            user.password = Hashing.withSalt(user.password);
             user.type = [UserType.User];
         }
         const role = await Role.find<IRole>({ name: userRoleName });
@@ -62,16 +63,8 @@ export class AccountController extends BaseController {
             throw new Err(Err.Code.OperationFailed, "err_no_role");
         }
         user.role = role.items[0].id;
-        // generating password for new user
-        const randomNumber = Hashing.randomInt();
-        user.password = Hashing.withSalt(`${randomNumber}`);
         const result = userExists ? await user.update<IUser>() : await user.insert<IUser>();
-        // sending sms
-        const sms = await TextMessage.getInstance().sendMessage(`${this.message.password}${randomNumber}`, user.mobile);
-        if (sms.RetStatus === 1) {
-            return res.json({});
-        }
-        throw new Err(Err.Code.OperationFailed, "err_sms");
+        return res.json({});
     }
 
     private async login(req: IExtRequest, res: Response, next: NextFunction) {
@@ -79,14 +72,15 @@ export class AccountController extends BaseController {
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.WrongInput);
         }
-        let user = new User(req.body);
-        let validationError = user.validate('username', 'password');
+        const user = new User(req.body);
+        const validationError = user.validate("username", "password");
         if (validationError) {
             throw new ValidationError(validationError);
         }
         user.password = Hashing.withSalt(user.password);
-        let result = await User.find<IUser>({ username: user.username, password: user.password }, { relations: ['role'] });
-        if (result.items.length != 1) {
+        const result = await User.find<IUser>({ username: user.username, password: user.password },
+            { relations: ["role"] });
+        if (result.items.length !== 1) {
             throw new Err(Err.Code.DBNoRecord);
         }
         result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
@@ -94,16 +88,16 @@ export class AccountController extends BaseController {
         user.sourceApp = sourceApp;
         delete user.password;
         // prevent admin from logging into application
-        if (this.isAdmin(user) && user.sourceApp != SourceApp.Panel) {
+        if (this.isAdmin(user) && user.sourceApp !== SourceApp.Panel) {
             throw new Err(Err.Code.Forbidden, "err_admin_login");
         }
         // prevent other users from logging into panel
-        if (user.sourceApp == SourceApp.Panel && !user.isOfType(UserType.Admin)) {
-            throw new Err(Err.Code.Forbidden, 'err_user_admin_login');
+        if (user.sourceApp === SourceApp.Panel && !user.isOfType(UserType.Admin)) {
+            throw new Err(Err.Code.Forbidden, "err_user_admin_login");
         }
         // prevent none user from logging into user app
-        if (user.sourceApp == SourceApp.EndUser && !user.isOfType(UserType.User)) {
-            throw new Err(Err.Code.Forbidden, 'err_none_user_login');
+        if (user.sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
+            throw new Err(Err.Code.Forbidden, "err_none_user_login");
         }
         req.session.destroy();
         const session = await Session.create(req.body.rememberMe);
@@ -115,7 +109,7 @@ export class AccountController extends BaseController {
 
     private async logout(req: IExtRequest, res: Response, next: NextFunction) {
         const result = await User.find<IUser>(this.getUserFromSession(req).id);
-        if (result.items.length != 1) {
+        if (result.items.length !== 1) {
             throw new DatabaseError(Err.Code.DBNoRecord, null);
         }
         req.session.destroy();
@@ -135,7 +129,7 @@ export class AccountController extends BaseController {
             throw new ValidationError(validationError);
         }
         const result = await User.find<IUser>({ mobile: user.mobile });
-        if (result.items.length != 1) {
+        if (result.items.length !== 1) {
             throw new ValidationError({ mobile: "invalid" });
         }
         user.setValues(result.items[0]);
@@ -154,12 +148,12 @@ export class AccountController extends BaseController {
     }
 
     private async getMe(req: IExtRequest, res: Response, next: NextFunction) {
-        //<production>
+        // <production>
         const sourceApp = +req.query.s;
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.Forbidden, null, "getMe", "AccountController");
         }
-        //</production>
+        // </production>
         const user = this.getUserFromSession(req);
         if (user.id) {
             const result = await User.find<IUser>(user.id, { relations: ["role"] });

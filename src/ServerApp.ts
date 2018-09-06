@@ -5,7 +5,7 @@ import * as cors from "cors";
 import * as express from "express";
 import { readdirSync } from "fs";
 import * as helmet from "helmet";
-import { Server, createServer } from "http";
+import { createServer, Server } from "http";
 import { ApiFactory } from "./api/ApiFactory";
 import { IExtRequest } from "./api/BaseController";
 import { AclPolicy } from "./cmn/enum/Acl";

@@ -7,59 +7,59 @@ import { BaseController, IExtRequest } from "../../BaseController";
 export class RoleController extends BaseController {
 
     public route(router: Router) {
-        router.get('/acl/role/:id', this.checkAcl('acl.role', AclAction.Read), this.wrap(this.getRole));
-        router.get('/acl/role', this.checkAcl('acl.role', AclAction.Read), this.wrap(this.getRoles));
-        router.post('/acl/role', this.checkAcl('acl.role', AclAction.Add), this.wrap(this.addRole));
-        router.put('/acl/role', this.checkAcl('acl.role', AclAction.Edit), this.wrap(this.updateRole));
-        router.delete('/acl/role/:id', this.checkAcl('acl.role', AclAction.Delete), this.wrap(this.removeRole));
+        router.get("/acl/role/:id", this.checkAcl("acl.role", AclAction.Read), this.wrap(this.getRole));
+        router.get("/acl/role", this.checkAcl("acl.role", AclAction.Read), this.wrap(this.getRoles));
+        router.post("/acl/role", this.checkAcl("acl.role", AclAction.Add), this.wrap(this.addRole));
+        router.put("/acl/role", this.checkAcl("acl.role", AclAction.Edit), this.wrap(this.updateRole));
+        router.delete("/acl/role/:id", this.checkAcl("acl.role", AclAction.Delete), this.wrap(this.removeRole));
     }
 
     public async getRole(req: IExtRequest, res: Response, next: NextFunction) {
-        let id = this.retrieveId(req);
-        let result = await Role.find<IRole>(id, { relations: ['permissions'] });
-        res.json(result)
+        const id = this.retrieveId(req);
+        const result = await Role.find<IRole>(id, { relations: ["permissions"] });
+        res.json(result);
     }
 
     public async getRoles(req: IExtRequest, res: Response, next: NextFunction) {
-        let query = this.query2vql(Role, req.query);
+        const query = this.query2vql(Role, req.query);
         delete query.limit;
-        let result = await Role.find(query);
-        res.json(result)
+        const result = await Role.find(query);
+        res.json(result);
     }
 
     public async addRole(req: IExtRequest, res: Response, next: NextFunction) {
-        let role = new Role(req.body);
-        let validationError = role.validate();
+        const role = new Role(req.body);
+        const validationError = role.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await role.insert<IRole>();
+        const result = await role.insert<IRole>();
         await this.acl.initAcl();
-        res.json(result)
+        res.json(result);
     }
 
     public async updateRole(req: IExtRequest, res: Response, next: NextFunction) {
-        let role = new Role(req.body);
-        let validationError = role.validate();
+        const role = new Role(req.body);
+        const validationError = role.validate();
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        let result = await Role.find<IRole>(role.id);
-        if (result.items.length == 1) {
+        const result = await Role.find<IRole>(role.id);
+        if (result.items.length === 1) {
             // prevent updating root role
             const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
-            if (result.items[0].name == rootRoleName) {
-                throw new Err(Err.Code.WrongInput)
+            if (result.items[0].name === rootRoleName) {
+                throw new Err(Err.Code.WrongInput);
             }
             // prevent changing guest role name
-            if (result.items[0].name == guestRoleName) {
+            if (result.items[0].name === guestRoleName) {
                 role.name = guestRoleName;
             }
             // prevent changing user role name
-            if (result.items[0].name == userRoleName) {
+            if (result.items[0].name === userRoleName) {
                 role.name = userRoleName;
             }
-            let rResult = await role.update();
+            const rResult = await role.update();
             await this.acl.initAcl();
             res.json(rResult);
         } else {
@@ -68,17 +68,17 @@ export class RoleController extends BaseController {
     }
 
     public async removeRole(req: IExtRequest, res: Response, next: NextFunction) {
-        let id = this.retrieveId(req);
-        let role = new Role({ id });
-        let result = await Role.find<IRole>(role.id);
-        if (result.items.length == 1) {
+        const id = this.retrieveId(req);
+        const role = new Role({ id });
+        const result = await Role.find<IRole>(role.id);
+        if (result.items.length === 1) {
             // prevent deleting root & guest & user role
             const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
-            let roleName = result.items[0].name;
+            const roleName = result.items[0].name;
             if ([rootRoleName, guestRoleName, userRoleName].indexOf(roleName) >= 0) {
-                throw new Err(Err.Code.WrongInput, 'err_default_role_delete');
+                throw new Err(Err.Code.WrongInput, "err_default_role_delete");
             }
-            let delResult = await role.remove();
+            const delResult = await role.remove();
             if (delResult.items.length) {
                 await this.acl.initAcl();
             }
