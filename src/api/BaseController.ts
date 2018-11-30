@@ -1,10 +1,11 @@
+// tslint:disable-next-line:max-line-length
+import { Database, Err, IModel, IQueryOption, IRequest, KeyValueDatabase, ValidationError, Vql } from "@vesta/core";
 import { NextFunction, Request, Response, Router } from "express";
 import { IRole } from "../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../cmn/models/User";
 import { IAppConfig } from "../config/appConfig";
 import { Acl } from "../helpers/Acl";
 import { LoggerFunction } from "../helpers/Logger";
-import { Database, Err, IModel, IQueryOption, IQueryRequest, KeyValueDatabase, ValidationError, Vql } from "../medium";
 import { Session } from "../session/Session";
 
 export interface IExtRequest extends Request {
@@ -87,7 +88,7 @@ export abstract class BaseController {
         return id;
     }
 
-    protected query2vql<T>(modelClass: IModel, req: IQueryRequest<T>, isCounting?: boolean, isSearch?: boolean): Vql {
+    protected query2vql<T>(modelClass: IModel, req: IRequest<T>, isCounting?: boolean, isSearch?: boolean): Vql {
         const fields = [];
         if (req.query) {
             for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
@@ -126,7 +127,7 @@ export abstract class BaseController {
         return query;
     }
 
-    protected parseQuery<T>(modelClass: IModel, req: IQueryRequest<T>): IQueryOption {
+    protected parseQuery<T>(modelClass: IModel, req: IRequest<T>): IQueryOption {
         const query: IQueryOption = {};
         const fields = [];
         if (req.query) {

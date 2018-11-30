@@ -96,7 +96,7 @@ export class ServerApp {
     private initErrorHandlers() {
         // 404 Not Found
         this.app.use((req: IExtRequest, res: express.Response, next: express.NextFunction) => {
-            this.handleError(req, res, new Err(404, `Not Found: ${req.url}`));
+            this.handleError(req, res, new Err(Err.Code.NotFound, `Not Found: ${req.url}`));
         });
         // 50x Internal Server Error
         this.app.use((err: any, req: IExtRequest, res: express.Response, next: express.NextFunction) => {
@@ -149,15 +149,15 @@ export class ServerApp {
             delete error.file;
             if ((error as any).sqlMessage) {
                 // sql error
-                error.code = Err.Code.Database;
+                error.code = Err.Code.Database.code;
                 delete error.message;
             }
         }
         if (error instanceof Error) {
-            error = new Err(error.code, error.message);
+            error = new Err({ code: error.code, errno: error.errno }, error.message);
         }
-        error.code = +error.code || Err.Code.Server;
-        res.status(error.code);
+        error.code = error.code || Err.Code.Server.code;
+        res.status(error.errno);
         res.json({ error });
     }
 }

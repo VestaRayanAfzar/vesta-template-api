@@ -1,7 +1,7 @@
+import { Database } from "@vesta/core";
 import { Router } from "express";
 import { IAppConfig } from "../config/appConfig";
 import { Acl } from "../helpers/Acl";
-import { Database } from "../medium";
 import { exporter } from "./v1/import";
 
 export class ApiFactory {

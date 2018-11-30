@@ -1,10 +1,10 @@
+import { DatabaseError, Err, IResponse, ValidationError } from "@vesta/core";
 import { NextFunction, Response, Router } from "express";
 import { LogLevel } from "../../../cmn/models/Log";
 import { IRole, Role } from "../../../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
 import { Hashing } from "../../../helpers/Hashing";
 import { TextMessage } from "../../../helpers/TextMessage";
-import { DatabaseError, Err, IQueryResult, ValidationError } from "../../../medium";
 import { Session } from "../../../session/Session";
 import { BaseController, IExtRequest } from "../../BaseController";
 
@@ -166,7 +166,7 @@ export class AccountController extends BaseController {
                 role: this.acl.updateRolePermissions({ name: guestRoleName }),
                 username: guestRoleName,
             } as IUser;
-            res.json({ items: [guest] } as IQueryResult<IUser>);
+            res.json({ items: [guest] } as IResponse<IUser>);
         }
     }
 }

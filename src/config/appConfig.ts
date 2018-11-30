@@ -1,8 +1,8 @@
+import { IDatabaseConfig } from "@vesta/core";
 import { dirname } from "path";
 import { cmnConfig, ICmnConfig } from "../cmn/config/cmnConfig";
 import { LogLevel } from "../cmn/models/Log";
 import { LogStorage } from "../helpers/LogFactory";
-import { IDatabaseConfig } from "../medium";
 import { IVariantConfig, variantConfig } from "./variantConfig";
 
 export interface ILogConfig {

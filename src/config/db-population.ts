@@ -1,4 +1,4 @@
-import { IQueryResult } from "@vesta/core";
+import { IResponse } from "@vesta/core";
 import { AclAction } from "../cmn/enum/Acl";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
@@ -22,14 +22,14 @@ export async function populate() {
     });
     await root.insert();
     // guest Role
-    const guest: Array<IQueryResult<IPermission>> = [
+    const guest: Array<IResponse<IPermission>> = [
         // VIP: guest should be able to logout (* => login, register, forget, logout)
         await Permission.find({ resource: "account", action: "*" }),
     ];
     role = new Role({ name: guestRoleName, desc: "Guest role", permissions: guest.map((item) => item.items[0].id) });
     await role.insert();
     // user Role
-    const user: Array<IQueryResult<IPermission>> = [
+    const user: Array<IResponse<IPermission>> = [
         await Permission.find({ resource: "account", action: "logout" }),
         await Permission.find({ resource: "user", action: AclAction.Read }),
         await Permission.find({ resource: "user", action: AclAction.Edit }),

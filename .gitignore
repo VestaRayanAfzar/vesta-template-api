@@ -1,7 +1,8 @@
 .DS_Store
 .idea
-/node_modules
-npm-debug*
+.vscode
+node_modules
+npm-debug.log
 /resources/tsd
 /resources/log
 /src/config/variantConfig.ts
