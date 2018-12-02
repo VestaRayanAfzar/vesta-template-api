@@ -115,7 +115,7 @@ export class UserController extends BaseController {
         const destDirectory = join(this.config.dir.upload, "user");
         const result = await User.find<IUser>(id);
         if (result.items.length !== 1) {
-            throw new Err(Err.Code.WrongInput);
+            throw new Err(Err.Code.NotAllowed);
         }
         user = new User(result.items[0]);
         const uploader = new FileUploader<IUser>(true);

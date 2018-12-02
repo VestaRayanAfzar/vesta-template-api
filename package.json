@@ -15,14 +15,14 @@
     "deploy": "tsc",
     "serve": "gulp api"
   },
-  "repository": "https://github.com/VestaRayanAfzar/vesta-template-api.git",
+  "repository": "https://github.com/vesta-boot/vesta-template-api.git",
   "bugs": {
-    "url": "https://github.com/VestaRayanAfzar/vesta-template-api/issues",
+    "url": "https://github.com/vesta-boot/vesta-template-api/issues",
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
-    "@vesta/core": "^2.0.4",
-    "@vesta/culture-ir": "^1.0.1",
+    "@vesta/core": "^2.0.5",
+    "@vesta/culture-ir": "^1.0.2",
     "@vesta/driver-mysql": "^1.0.11",
     "@vesta/driver-redis": "^1.0.0",
     "body-parser": "^1.18.3",
@@ -43,13 +43,13 @@
     "@types/jsonwebtoken": "^8.3.0",
     "@types/mkdirp": "^0.5.2",
     "@types/mysql": "^2.15.5",
-    "@types/node": "^10.12.10",
+    "@types/node": "^10.12.11",
     "@types/redis": "^2.8.8",
     "@types/uuid": "^3.4.4",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-develop-server": "^0.5.2",
     "request": "^2.88.0",
     "tslint": "^5.11.0",
-    "typescript": "^3.1.6"
+    "typescript": "^3.2.1"
   }
 }

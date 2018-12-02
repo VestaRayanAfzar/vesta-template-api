@@ -22,7 +22,7 @@ export class IndexController extends BaseController {
         const lng = req.params.lng;
         const lngPath = `${this.config.dir.root}/cmn/locale/${lng}/Dictionary.js`;
         access(lngPath, (error) => {
-            if (error) { return next(new Err(Err.Code.WrongInput, `Invalid language: ${lng}`)); }
+            if (error) { return next(new Err(Err.Code.NotAllowed, `Invalid language: ${lng}`)); }
             res.json({ dictionary: require(lngPath).Dictionary });
         });
     }

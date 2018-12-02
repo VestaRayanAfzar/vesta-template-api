@@ -136,7 +136,7 @@ export class ServerApp {
      */
     private handleError(req: IExtRequest, res: express.Response, error: Err | string) {
         if ("string" === typeof error) {
-            error = new Err(Err.Code.OperationFailed, error);
+            error = new Err(Err.Code.Server, error);
         }
         if (req.log) {
             req.log(LogLevel.Error, error.message, error.method || "handleError", error.file || "ServerApp");

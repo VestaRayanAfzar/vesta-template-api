@@ -60,7 +60,7 @@ export class AccountController extends BaseController {
         }
         const role = await Role.find<IRole>({ name: userRoleName });
         if (!role.items.length) {
-            throw new Err(Err.Code.OperationFailed, "err_no_role");
+            throw new Err(Err.Code.Server, "err_no_role");
         }
         user.role = role.items[0].id;
         const result = userExists ? await user.update<IUser>() : await user.insert<IUser>();
@@ -70,7 +70,7 @@ export class AccountController extends BaseController {
     private async login(req: IExtRequest, res: Response, next: NextFunction) {
         const sourceApp = req.body.s;
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
-            throw new Err(Err.Code.WrongInput);
+            throw new Err(Err.Code.NotAllowed);
         }
         const user = new User(req.body);
         const validationError = user.validate("username", "password");
@@ -144,7 +144,7 @@ export class AccountController extends BaseController {
             return res.json({});
         }
         // todo: something goes wrong
-        throw new Err(Err.Code.OperationFailed, "err_sms");
+        throw new Err(Err.Code.Server, "err_sms");
     }
 
     private async getMe(req: IExtRequest, res: Response, next: NextFunction) {

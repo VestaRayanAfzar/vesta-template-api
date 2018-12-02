@@ -49,7 +49,7 @@ export class RoleController extends BaseController {
             // prevent updating root role
             const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
             if (result.items[0].name === rootRoleName) {
-                throw new Err(Err.Code.WrongInput);
+                throw new Err(Err.Code.NotAllowed);
             }
             // prevent changing guest role name
             if (result.items[0].name === guestRoleName) {
@@ -76,7 +76,7 @@ export class RoleController extends BaseController {
             const { rootRoleName, guestRoleName, userRoleName } = this.config.security;
             const roleName = result.items[0].name;
             if ([rootRoleName, guestRoleName, userRoleName].indexOf(roleName) >= 0) {
-                throw new Err(Err.Code.WrongInput, "err_default_role_delete");
+                throw new Err(Err.Code.NotAllowed, "err_default_role_delete");
             }
             const delResult = await role.remove();
             if (delResult.items.length) {

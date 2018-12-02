@@ -35,7 +35,7 @@ export class FileUploader<T> {
         return new Promise((resolve, reject) => {
             this.form.parse(req, (err, fields, files) => {
                 if (err) {
-                    return reject(new Err(Err.Code.WrongInput, err.message));
+                    return reject(new Err(Err.Code.NotAllowed, err.message));
                 }
                 this.files = files;
                 resolve({ ...fields, ...files } as any as T);
