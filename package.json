@@ -15,15 +15,15 @@
     "deploy": "tsc",
     "serve": "gulp api"
   },
-  "repository": "https://github.com/vesta-boot/vesta-template-api.git",
+  "repository": "https://github.com/vestaBoot/vesta-template-api.git",
   "bugs": {
-    "url": "https://github.com/vesta-boot/vesta-template-api/issues",
+    "url": "https://github.com/vestaBoot/vesta-template-api/issues",
     "email": "bishehsary@gmail.com"
   },
   "dependencies": {
-    "@vesta/core": "^2.0.5",
+    "@vesta/core": "^2.0.6",
     "@vesta/culture-ir": "^1.0.2",
-    "@vesta/driver-mysql": "^1.0.11",
+    "@vesta/driver-mysql": "^2.0.0",
     "@vesta/driver-redis": "^1.0.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
