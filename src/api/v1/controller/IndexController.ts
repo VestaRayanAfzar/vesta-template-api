@@ -3,7 +3,6 @@ import { Culture } from "@vesta/culture";
 import { NextFunction, Response, Router } from "express";
 import { access } from "fs";
 import { BaseController, IExtRequest } from "../../BaseController";
-import { Notification } from "../../../helpers/Notification";
 
 export class IndexController extends BaseController {
 
@@ -69,6 +68,4 @@ export class IndexController extends BaseController {
         }
         return this.getLanguage(req, res, next);
     }
-
-
 }

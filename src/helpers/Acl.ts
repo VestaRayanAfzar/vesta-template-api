@@ -82,7 +82,7 @@ export class Acl {
                     }
                 }
                 if (!found) {
-                    newPermissions.push({ action: appAction, resource: appResource, status: Status.Active } as IPermission);
+                    newPermissions.push({ action: appAction, resource: appResource, status: Status.Active });
                 }
             }
         }

@@ -115,6 +115,7 @@ export abstract class BaseController {
                 isSearch ? query.search(req.query, modelClass) : query.filter(req.query);
             }
         }
+
         if (!isCounting) {
             if (req.relations) {
                 query.fetchRecordFor(...req.relations);
