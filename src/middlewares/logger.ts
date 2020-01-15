@@ -1,13 +1,13 @@
+import { LogLevel } from "@vesta/services";
 import { NextFunction, Response } from "express";
 import { IExtRequest } from "../api/BaseController";
-import { LogLevel } from "../cmn/models/Log";
-import { IUser, SourceApp } from "../cmn/models/User";
+import { IUser } from "../cmn/models/User";
 import { LogFactory } from "../helpers/LogFactory";
 
 export function loggerMiddleware(req: IExtRequest, res: Response, next: NextFunction) {
     const sourceApp = +(req.body.s || req.query.s);
     const user = req.session.get<IUser>("user");
-    const log = LogFactory.create(user ? +user.id : 0, sourceApp);
+    const log = LogFactory.create(user && user.id ? +user.id : 0);
     res.on("end", onAfterResponse);
     res.on("finish", onAfterResponse);
     req.log = log.log;

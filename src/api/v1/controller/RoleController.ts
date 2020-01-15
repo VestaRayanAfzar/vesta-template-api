@@ -1,6 +1,6 @@
 import { DatabaseError, Err, ValidationError } from "@vesta/core";
+import { AclAction } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
-import { AclAction } from "../../../cmn/enum/Acl";
 import { IRole, Role } from "../../../cmn/models/Role";
 import { BaseController, IExtRequest } from "../../BaseController";
 
@@ -69,7 +69,7 @@ export class RoleController extends BaseController {
 
     public async removeRole(req: IExtRequest, res: Response, next: NextFunction) {
         const id = this.retrieveId(req);
-        const role = new Role({ id });
+        const role = new Role({ id } as IRole);
         const result = await Role.find<IRole>(role.id);
         if (result.items.length === 1) {
             // prevent deleting root & guest & user role

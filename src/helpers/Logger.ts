@@ -1,6 +1,5 @@
-import { ILogger } from "../cmn/interfaces/Log";
-import { LogLevel } from "../cmn/models/Log";
-import { SourceApp } from "../cmn/models/User";
+import { LogLevel } from "@vesta/services";
+import { ILogger } from "../cmn/interfaces/Logger";
 import { LogFactory } from "./LogFactory";
 
 export type LoggerFunction = (level: LogLevel, message: string, method?: string, file?: string) => void;

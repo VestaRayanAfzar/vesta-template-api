@@ -8,7 +8,7 @@ export interface ITextMessageConfig {
     url: string;
     username: string;
     password: string;
-    number: string;
+    lineNumber: string;
 }
 
 export interface ITextMessageResult {
@@ -19,7 +19,7 @@ export class TextMessage {
 
     public static getInstance(): TextMessage {
         if (!TextMessage.instance) {
-            TextMessage.instance = new TextMessage(Config.get<ITextMessageConfig>("sms"));
+            TextMessage.instance = new TextMessage(Registry.get<ITextMessageConfig>("sms"));
         }
         return TextMessage.instance;
     }
@@ -36,7 +36,7 @@ export class TextMessage {
     }
 
     public async sendMessage(to: string, text: string): Promise<ITextMessageResult> {
-        const { username, password, number } = this.config;
+        const { username, password, lineNumber } = this.config;
         return new Promise<ITextMessageResult>((resolve, reject) => {
             const req = request(this.getReqOptions(), (res) => {
                 const chunks = [];
@@ -51,7 +51,7 @@ export class TextMessage {
             req.on("error", (error) => {
                 reject(error);
             });
-            req.write(stringify({ username, password, to, from: number, text, isflash: "false" }));
+            req.write(stringify({ username, password, to, from: lineNumber, text, isflash: "false" }));
             req.end();
         });
     }

@@ -1,6 +1,6 @@
 import { DatabaseError, Err, ValidationError } from "@vesta/core";
+import { AclAction } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
-import { AclAction } from "../../../cmn/enum/Acl";
 import { IToken, Token } from "../../../cmn/models/Token";
 import { IUser } from "../../../cmn/models/User";
 import { BaseController, IExtRequest } from "../../BaseController";

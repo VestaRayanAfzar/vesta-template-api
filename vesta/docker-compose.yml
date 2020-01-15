@@ -36,7 +36,7 @@ services:
     networks:
       - network
     working_dir: /app/vesta/server
-    command: npm run serve
+    command: npm run api
     environment:
       NODE_ENV: development
       LOG_LEVEL: 3

@@ -1,9 +1,9 @@
 // tslint:disable-next-line:max-line-length
-import { Database, Err, IModel, IQueryOption, IRequest, KeyValueDatabase, ValidationError, Vql } from "@vesta/core";
+import { Database, Err, IModel, IQueryOption, IRequest, KeyValueDatabase, ValidationError, Vql, Hlc, Condition } from "@vesta/core";
 import { NextFunction, Request, Response, Router } from "express";
 import { IRole } from "../cmn/models/Role";
-import { IUser, SourceApp, User, UserType } from "../cmn/models/User";
-import { IAppConfig } from "../config/appConfig";
+import { IUser, User, UserType } from "../cmn/models/User";
+import { appConfig, IAppConfig } from "../config/appConfig";
 import { Acl } from "../helpers/Acl";
 import { LoggerFunction } from "../helpers/Logger";
 import { Session } from "../session/Session";
@@ -103,11 +103,18 @@ export abstract class BaseController {
         }
         if (fields.length) {
             const model = new modelClass(req.query);
+            // todo: checking for range from - to / validation
+            const rangeCondition = this.checkRangeAndBuildQuery(fields, req.query);
+            if (rangeCondition) {
+                query.where(rangeCondition);
+            } else {
             const validationError = model.validate(...fields);
             if (validationError) {
                 throw new ValidationError(validationError);
             }
+
             isSearch ? query.search(req.query, modelClass) : query.filter(req.query);
+        }
         }
         if (!isCounting) {
             if (req.relations) {
@@ -168,5 +175,33 @@ export abstract class BaseController {
                 next(error);
             }
         };
+    }
+
+    protected checkRangeAndBuildQuery(fields: string[], filter: Object): Condition | null {
+        let hasComplex = false;
+        const conditions: Condition[] = [];
+        for (let i = 0, il = fields.length; i < il; ++i) {
+            const value = filter[fields[i]];
+            let isSimple = true;
+            if (value.hasOwnProperty("from")) {
+                hasComplex = true;
+                isSimple = false;
+                conditions.push(Hlc.egt(fields[i], value.from));
+            }
+            if (value.hasOwnProperty("to")) {
+                hasComplex = true;
+                isSimple = false;
+                conditions.push(Hlc.elt(fields[i], value.from));
+            }
+            if (value.hasOwnProperty("isLike")) {
+                hasComplex = true;
+                isSimple = false;
+                conditions.push(Hlc.like(fields[i], `%${value.value}%`));
+            }
+            if (isSimple) {
+                conditions.push(Hlc.eq(fields[i], value));
+            }
+        }
+        return hasComplex ? Hlc.and(...conditions) : null;
     }
 }

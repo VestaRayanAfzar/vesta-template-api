@@ -1,7 +1,7 @@
 import { Err } from "@vesta/core";
+import { AclAction } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
 import { access, createReadStream, readdir, unlink } from "fs";
-import { AclAction } from "../../../cmn/enum/Acl";
 import { Log } from "../../../cmn/models/Log";
 import { BaseController, IExtRequest } from "../../BaseController";
 

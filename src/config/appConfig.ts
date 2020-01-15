@@ -1,4 +1,5 @@
 import { IDatabaseConfig } from "@vesta/core";
+import { LogLevel } from "@vesta/services";
 import { dirname } from "path";
 import { cmnConfig, ICmnConfig } from "../cmn/config/cmnConfig";
 import { LogLevel } from "../cmn/models/Log";
