@@ -1,7 +1,7 @@
 import { DatabaseError, Err, sanitizePhoneNumber, ValidationError } from "@vesta/core";
+import { AclAction } from "@vesta/services";
 import { Response, Router } from "express";
 import { join } from "path";
-import { AclAction } from "../../../cmn/enum/Acl";
 import { IRole } from "../../../cmn/models/Role";
 import { IUser, User } from "../../../cmn/models/User";
 import { FileUploader } from "../../../helpers/FileUploader";
@@ -59,7 +59,9 @@ export class UserController extends BaseController {
             throw new Err(Err.Code.Forbidden);
         }
         const user = new User(req.body);
-        user.mobile = sanitizePhoneNumber(user.mobile);
+        if (user.mobile) {
+            user.mobile = sanitizePhoneNumber(user.mobile);
+        }
         const validationError = user.validate();
         if (validationError) {
             throw new ValidationError(validationError);

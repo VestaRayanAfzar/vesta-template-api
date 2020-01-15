@@ -1,5 +1,5 @@
 import { Hlc as C, Vql } from "@vesta/core";
-import { AclAction, AclPolicy } from "../cmn/enum/Acl";
+import { AclAction, AclPolicy } from "@vesta/services";
 import { Status } from "../cmn/enum/Status";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
@@ -82,7 +82,7 @@ export class Acl {
                     }
                 }
                 if (!found) {
-                    newPermissions.push({ resource: appResource, action: appAction, status: Status.Active });
+                    newPermissions.push({ action: appAction, resource: appResource, status: Status.Active } as IPermission);
                 }
             }
         }
@@ -132,7 +132,7 @@ export class Acl {
         if (!(role in this.roles)) {
             this.roles[role] = [];
         }
-        this.roles[role].push({ resource, action });
+        this.roles[role].push({ resource, action } as IPermission);
     }
 
     /**

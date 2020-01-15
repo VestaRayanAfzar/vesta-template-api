@@ -1,9 +1,10 @@
 import { IDatabaseConfig } from "@vesta/core";
+import { LogLevel } from "@vesta/services";
 import { dirname } from "path";
 import { cmnConfig, ICmnConfig } from "../cmn/config/cmnConfig";
-import { LogLevel } from "../cmn/models/Log";
 import { LogStorage } from "../helpers/LogFactory";
 import { IVariantConfig, variantConfig } from "./variantConfig";
+import { Algorithm } from "jsonwebtoken";
 
 export interface ILogConfig {
     dir: string;
@@ -14,7 +15,7 @@ export interface ILogConfig {
 
 export interface ISessionConfig {
     database: IDatabaseConfig;
-    hashing: string;
+    hashing: Algorithm;
     idPrefix: string;
     maxAge: number;
 }

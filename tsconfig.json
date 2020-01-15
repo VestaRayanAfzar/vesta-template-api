@@ -4,9 +4,11 @@
     "module": "commonjs",
     "outDir": "vesta/server/",
     "moduleResolution": "node",
+    "noEmitHelpers": true,
     "sourceMap": true,
     "noEmitHelpers": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
   },
   "include": [
     "src/**/*.ts"

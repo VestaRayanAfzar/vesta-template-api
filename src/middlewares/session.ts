@@ -5,6 +5,7 @@ import { Session } from "../session/Session";
 
 export function sessionMiddleware(req: IExtRequest, res: Response, next: NextFunction) {
     const token = req.get("X-Auth-Token");
+    // if (!token) { return next(new Err(Err.Code.Unauthorized)); }
     if (!token) { return newSession(); }
     JWT.verify(token, (err, payload: any) => err ? newSession() : restoreSession(payload.sessionId));
 

@@ -1,5 +1,6 @@
 import { Database, Err, IModelCollection, KeyValueDatabase } from "@vesta/core";
 import { MySQL } from "@vesta/driver-mysql";
+import { AclPolicy, LogLevel } from "@vesta/services";
 import { json, urlencoded } from "body-parser";
 import * as cors from "cors";
 import * as express from "express";
@@ -8,8 +9,6 @@ import * as helmet from "helmet";
 import { createServer, Server } from "http";
 import { ApiFactory } from "./api/ApiFactory";
 import { IExtRequest } from "./api/BaseController";
-import { AclPolicy } from "./cmn/enum/Acl";
-import { LogLevel } from "./cmn/models/Log";
 import { IAppConfig } from "./config/appConfig";
 import { Acl } from "./helpers/Acl";
 import { DatabaseFactory } from "./helpers/DatabaseFactory";
@@ -36,7 +35,7 @@ export class ServerApp {
         }
     }
 
-    public async init(): Promise<any> {
+    public async init(): Promise<void> {
         this.configExpressServer();
         await Session.init(this.config.security.session);
         await this.initDatabase();

@@ -1,5 +1,5 @@
 import { appendFile, existsSync, writeFileSync } from "fs";
-import { ILogger } from "../cmn/interfaces/Log";
+import { ILogger } from "../cmn/interfaces/Logger";
 import { ILog } from "../cmn/models/Log";
 import { SourceApp } from "../cmn/models/User";
 import { ILogConfig } from "../config/appConfig";

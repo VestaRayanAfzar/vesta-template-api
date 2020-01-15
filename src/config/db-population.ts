@@ -1,8 +1,8 @@
 import { IResponse } from "@vesta/core";
-import { AclAction } from "../cmn/enum/Acl";
+import { AclAction } from "@vesta/services";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
-import { User, UserType } from "../cmn/models/User";
+import { IUser, User, UserType } from "../cmn/models/User";
 import { Hashing } from "../helpers/Hashing";
 import { appConfig } from "./appConfig";
 
@@ -10,7 +10,9 @@ export async function populate() {
     const { rootRoleName, guestRoleName, userRoleName } = appConfig.security;
     // root Role & User
     const pResult = await Permission.find({ resource: "*", action: "*" });
-    let role = new Role({ name: rootRoleName, desc: "Root role", permissions: [(pResult.items[0] as IPermission).id] });
+    let role = new Role({
+        desc: "Root role", name: rootRoleName, permissions: [(pResult.items[0] as IPermission).id],
+    } as IRole);
     const rInsert = await role.insert<IRole>();
     const root = new User({
         firstName: rootRoleName,
@@ -19,21 +21,25 @@ export async function populate() {
         role: rInsert.items[0].id,
         type: [UserType.Admin],
         username: rootRoleName,
-    });
+    } as IUser);
     await root.insert();
     // guest Role
     const guest: Array<IResponse<IPermission>> = [
         // VIP: guest should be able to logout (* => login, register, forget, logout)
-        await Permission.find({ resource: "account", action: "*" }),
+        await Permission.find({ resource: "account", action: "*" } as IPermission),
     ];
-    role = new Role({ name: guestRoleName, desc: "Guest role", permissions: guest.map((item) => item.items[0].id) });
+    role = new Role({
+        desc: "Guest role", name: guestRoleName, permissions: guest.map((item) => item.items[0].id),
+    } as IRole);
     await role.insert();
     // user Role
     const user: Array<IResponse<IPermission>> = [
-        await Permission.find({ resource: "account", action: "logout" }),
-        await Permission.find({ resource: "user", action: AclAction.Read }),
-        await Permission.find({ resource: "user", action: AclAction.Edit }),
+        await Permission.find({ resource: "account", action: "logout" } as IPermission),
+        await Permission.find({ resource: "user", action: AclAction.Read } as IPermission),
+        await Permission.find({ resource: "user", action: AclAction.Edit } as IPermission),
     ];
-    role = new Role({ name: userRoleName, desc: "User role", permissions: user.map((item) => item.items[0].id) });
+    role = new Role({
+        desc: "User role", name: userRoleName, permissions: user.map((item) => item.items[0].id),
+    } as IRole);
     await role.insert();
 }

@@ -24,7 +24,7 @@ export class Notification {
     }
 
     public async sendMessage(userId: number, message: string, sourceApp: SourceApp, data?: any) {
-        const result = await Token.find<IToken>({ user: userId });
+        const result = await Token.find<IToken>({ user: userId } as IToken);
         if (!result.items.length) {
             throw new Err(Err.Code.Token);
         }

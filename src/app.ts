@@ -1,19 +1,10 @@
 #!/usr/bin/env node
 import { appConfig } from "./config/appConfig";
 import { Config } from "./helpers/Config";
-import { ITextMessageConfig } from "./helpers/TextMessage";
 import { ServerApp } from "./ServerApp";
 
 Config.init(appConfig);
 // Culture.register(IrLocale, IrVocabs, IrDate);
-// application based configuration
-Config.set<ITextMessageConfig>("sms", {
-    host: "",
-    number: "",
-    password: "",
-    url: "",
-    username: "",
-});
 
 // initiating server
 const MAX_TRY_COUNT = 3;

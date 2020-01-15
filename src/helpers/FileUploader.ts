@@ -4,8 +4,7 @@ import { access, rename, unlink } from "fs";
 import * as mkdirp from "mkdirp";
 import { join, parse } from "path";
 import { IExtRequest } from "../api/BaseController";
-import { IDirConfig } from "../config/appConfig";
-import { Config } from "./Config";
+import { appConfig } from "../config/appConfig";
 import { Hashing } from "./Hashing";
 
 export class FileUploader<T> {
@@ -26,7 +25,7 @@ export class FileUploader<T> {
     private destination;
 
     constructor(private genRandomFileName) {
-        this.form.uploadDir = Config.get<IDirConfig>("dir").upload;
+        this.form.uploadDir = appConfig.dir.upload;
         this.form.keepExtensions = true;
         this.form.multiples = true;
     }

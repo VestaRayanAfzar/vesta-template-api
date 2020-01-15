@@ -1,17 +1,16 @@
 import { DatabaseError, Err, IResponse, ValidationError } from "@vesta/core";
 import { NextFunction, Response, Router } from "express";
-import { LogLevel } from "../../../cmn/models/Log";
 import { IRole, Role } from "../../../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
 import { Hashing } from "../../../helpers/Hashing";
-import { TextMessage } from "../../../helpers/TextMessage";
 import { Session } from "../../../session/Session";
 import { BaseController, IExtRequest } from "../../BaseController";
+import { Culture } from "@vesta/culture";
+import { LogLevel } from "@vesta/services";
 
 export class AccountController extends BaseController {
-    private message = {
-        password: "کلمه ورود شما: ",
-    };
+
+    private tr = Culture.getDictionary().translate;
 
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
@@ -58,7 +57,7 @@ export class AccountController extends BaseController {
             user.password = Hashing.withSalt(user.password);
             user.type = [UserType.User];
         }
-        const role = await Role.find<IRole>({ name: userRoleName });
+        const role = await Role.find<IRole>({ name: userRoleName } as IRole);
         if (!role.items.length) {
             throw new Err(Err.Code.Server, "err_no_role");
         }
@@ -78,7 +77,7 @@ export class AccountController extends BaseController {
             throw new ValidationError(validationError);
         }
         user.password = Hashing.withSalt(user.password);
-        const result = await User.find<IUser>({ username: user.username, password: user.password },
+        const result = await User.find<IUser>({ username: user.username, password: user.password } as IUser,
             { relations: ["role"] });
         if (result.items.length !== 1) {
             throw new Err(Err.Code.DBNoRecord);
@@ -128,21 +127,21 @@ export class AccountController extends BaseController {
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        const result = await User.find<IUser>({ mobile: user.mobile });
+        const result = await User.find<IUser>({ mobile: user.mobile } as IUser);
         if (result.items.length !== 1) {
             throw new ValidationError({ mobile: "invalid" });
         }
         user.setValues(result.items[0]);
         // enumeration possibility
         const randomNumber = Hashing.randomInt();
-        const sms = await TextMessage.getInstance()
-            .sendMessage(`${this.message.password}${randomNumber}`, result.items[0].mobile);
-        if (sms.RetStatus === 1) {
-            // updating user password
-            user.password = Hashing.withSalt(`${randomNumber}`);
-            await user.update();
-            return res.json({});
-        }
+        // const sms = await TextMessage.getInstance()
+        //     .sendMessage(`${this.tr("msg_reset_pass", randomNumber)}`, result.items[0].mobile);
+        // if (sms.RetStatus === 1) {
+        //     // updating user password
+        //     user.password = Hashing.withSalt(`${randomNumber}`);
+        //     await user.update();
+        //     return res.json({});
+        // }
         // todo: something goes wrong
         throw new Err(Err.Code.Server, "err_sms");
     }
@@ -163,7 +162,7 @@ export class AccountController extends BaseController {
         } else {
             const { guestRoleName } = this.config.security;
             const guest = {
-                role: this.acl.updateRolePermissions({ name: guestRoleName }),
+                role: this.acl.updateRolePermissions({ name: guestRoleName } as IRole),
                 username: guestRoleName,
             } as IUser;
             res.json({ items: [guest] } as IResponse<IUser>);
