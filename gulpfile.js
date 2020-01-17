@@ -22,7 +22,7 @@ module.exports = {
 
 function api() {
     const { port } = setting.debug;
-    server.listen({ path: `${dir.buildServer}/app.js`, execArgv: [`--inspect=0.0.0.0:${port}`] });
+    server.listen({ path: `${dir.buildServer}/index.js`, execArgv: [`--inspect=0.0.0.0:${port}`] });
     return Promise.resolve();
 }
 
