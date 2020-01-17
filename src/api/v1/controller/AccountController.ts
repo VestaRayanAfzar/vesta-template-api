@@ -1,12 +1,12 @@
 import { DatabaseError, Err, IResponse, ValidationError } from "@vesta/core";
+import { Culture } from "@vesta/culture";
+import { LogLevel } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
 import { IRole, Role } from "../../../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
 import { Hashing } from "../../../helpers/Hashing";
 import { Session } from "../../../session/Session";
 import { BaseController, IExtRequest } from "../../BaseController";
-import { Culture } from "@vesta/culture";
-import { LogLevel } from "@vesta/services";
 
 export class AccountController extends BaseController {
 
@@ -147,12 +147,15 @@ export class AccountController extends BaseController {
     }
 
     private async getMe(req: IExtRequest, res: Response, next: NextFunction) {
-        // <production>
+
         const sourceApp = +req.query.s;
-        if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
-            throw new Err(Err.Code.Forbidden, null, "getMe", "AccountController");
+
+        if (this.isProduction) {
+            if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
+                throw new Err(Err.Code.Forbidden, null, "getMe", "AccountController");
+            }
         }
-        // </production>
+
         const user = this.getUserFromSession(req);
         if (user.id) {
             const result = await User.find<IUser>(user.id, { relations: ["role"] });

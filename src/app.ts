@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-import { appConfig } from "./config/appConfig";
-import { Config } from "./helpers/Config";
+import { Culture } from "@vesta/culture";
+import { IrDate, IrLocale } from "@vesta/culture-ir";
+import { UsDate, UsLocale } from "@vesta/culture-us";
+import { IrVocabs } from "./cmn/vocabs/IrVocabs";
+import { UsVocabs } from "./cmn/vocabs/UsVocabs";
+import config from "./config";
 import { ServerApp } from "./ServerApp";
 
-Config.init(appConfig);
-// Culture.register(IrLocale, IrVocabs, IrDate);
+Culture.register(UsLocale, UsVocabs, UsDate);
+Culture.register(IrLocale, IrVocabs, IrDate);
 
 // initiating server
 const MAX_TRY_COUNT = 3;
@@ -13,7 +17,7 @@ let tryCounter = 1;
 
 (async function run() {
     try {
-        const server = new ServerApp(appConfig);
+        const server = new ServerApp(config);
         await server.init();
         await server.start();
         // tslint:disable-next-line:no-console

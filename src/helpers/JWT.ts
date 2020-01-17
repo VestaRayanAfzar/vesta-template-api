@@ -1,8 +1,7 @@
-import * as jwt from "jsonwebtoken";
-import { SignOptions, VerifyCallback, VerifyOptions } from "jsonwebtoken";
-import { appConfig } from "../config/appConfig";
+import { sign, SignOptions, verify, VerifyCallback, VerifyOptions } from "jsonwebtoken";
+import config from "../config";
 
-const security = appConfig.security;
+const security = config.security;
 
 export class JWT {
 
@@ -12,7 +11,7 @@ export class JWT {
             algorithm: security.session.hashing,
         };
         try {
-            return jwt.sign(payload, secretOrPrivateKey, options);
+            return sign(payload, secretOrPrivateKey, options);
         } catch (e) {
             // tslint:disable-next-line:no-console
             console.error("jwt sign failed", e);
@@ -27,7 +26,7 @@ export class JWT {
             ignoreExpiration: true,
         };
         try {
-            jwt.verify(token, secretOrPrivateKey, options, callback);
+            verify(token, secretOrPrivateKey, options, callback);
         } catch (e) {
             callback(e, null);
         }

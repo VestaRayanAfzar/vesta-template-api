@@ -3,7 +3,7 @@ import { AclAction, AclPolicy } from "@vesta/services";
 import { Status } from "../cmn/enum/Status";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
-import { IAppConfig } from "../config/appConfig";
+import { IAppConfig } from "../config";
 import { populate } from "../config/db-population";
 
 export interface IRolesList {

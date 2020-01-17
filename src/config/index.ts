@@ -1,10 +1,10 @@
 import { IDatabaseConfig } from "@vesta/core";
 import { LogLevel } from "@vesta/services";
+import { Algorithm } from "jsonwebtoken";
 import { dirname } from "path";
-import { cmnConfig, ICmnConfig } from "../cmn/config/cmnConfig";
+import { cmnConfig, ICmnConfig } from "../cmn/config";
 import { LogStorage } from "../helpers/LogFactory";
 import { IVariantConfig, variantConfig } from "./variantConfig";
-import { Algorithm } from "jsonwebtoken";
 
 export interface ILogConfig {
     dir: string;
@@ -50,7 +50,7 @@ export interface IAppConfig extends IVariantConfig, ICmnConfig {
 
 const env = process.env;
 
-export const appConfig: IAppConfig = {
+const appConfig: IAppConfig = {
     database: {
         database: env.ADB_NAME,
         host: env.ADB_HOST,
@@ -95,3 +95,5 @@ export const appConfig: IAppConfig = {
     },
     version: cmnConfig.version,
 };
+
+export default appConfig;

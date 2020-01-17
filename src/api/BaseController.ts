@@ -2,7 +2,7 @@ import { Condition, Database, Err, Hlc, IModel, IQueryOption, IRequest, KeyValue
 import { NextFunction, Request, Response, Router } from "express";
 import { IRole } from "../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../cmn/models/User";
-import { IAppConfig } from "../config/appConfig";
+import { IAppConfig } from "../config";
 import { Acl } from "../helpers/Acl";
 import { LoggerFunction } from "../helpers/Logger";
 import { Session } from "../session/Session";
@@ -43,6 +43,10 @@ export abstract class BaseController {
      */
     protected init() {
         // tslint
+    }
+
+    protected get isProduction(): boolean {
+        return this.config.env === "production";
     }
 
     protected getUserFromSession(req: IExtRequest): User {

@@ -2,7 +2,7 @@ import { KeyValueDatabase } from "@vesta/core";
 import { Redis } from "@vesta/driver-redis";
 import { Response } from "express";
 import { v4 } from "uuid";
-import { ISessionConfig } from "../config/appConfig";
+import { ISessionConfig } from "../config";
 import { JWT } from "../helpers/JWT";
 
 export interface ISessionData {

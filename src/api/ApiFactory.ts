@@ -1,6 +1,6 @@
 import { Database } from "@vesta/core";
 import { Router } from "express";
-import { IAppConfig } from "../config/appConfig";
+import { IAppConfig } from "../config";
 import { Acl } from "../helpers/Acl";
 import { exporter } from "./v1/import";
 

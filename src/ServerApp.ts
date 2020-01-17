@@ -9,13 +9,14 @@ import * as helmet from "helmet";
 import { createServer, Server } from "http";
 import { ApiFactory } from "./api/ApiFactory";
 import { IExtRequest } from "./api/BaseController";
-import { IAppConfig } from "./config/appConfig";
+import { IAppConfig } from "./config";
 import { Acl } from "./helpers/Acl";
 import { DatabaseFactory } from "./helpers/DatabaseFactory";
 import { LogFactory } from "./helpers/LogFactory";
 import { loggerMiddleware } from "./middlewares/logger";
 import { sessionMiddleware } from "./middlewares/session";
 import { Session } from "./session/Session";
+import { Culture } from "@vesta/culture";
 
 export class ServerApp {
     private app: express.Express;

@@ -1,13 +1,13 @@
 import { IResponse } from "@vesta/core";
 import { AclAction } from "@vesta/services";
+import config from ".";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
 import { IUser, User, UserType } from "../cmn/models/User";
 import { Hashing } from "../helpers/Hashing";
-import { appConfig } from "./appConfig";
 
 export async function populate() {
-    const { rootRoleName, guestRoleName, userRoleName } = appConfig.security;
+    const { rootRoleName, guestRoleName, userRoleName } = config.security;
     // root Role & User
     const pResult = await Permission.find({ resource: "*", action: "*" });
     let role = new Role({

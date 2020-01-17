@@ -2,7 +2,6 @@ import { Err } from "@vesta/core";
 import { request } from "https";
 import { IToken, Token } from "../cmn/models/Token";
 import { SourceApp } from "../cmn/models/User";
-import { Config } from "./Config";
 
 export class Notification {
 
@@ -18,9 +17,8 @@ export class Notification {
     private euAuth;
 
     private constructor() {
-        const notifConfig = Config.get<any>("notif");
-        this.euKey = notifConfig.euKey;
-        this.euAuth = notifConfig.euAuth;
+        // this.euKey = notifConfig.euKey;
+        // this.euAuth = notifConfig.euAuth;
     }
 
     public async sendMessage(userId: number, message: string, sourceApp: SourceApp, data?: any) {
