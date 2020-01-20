@@ -165,7 +165,7 @@ export class AccountController extends BaseController {
         } else {
             const { guestRoleName } = this.config.security;
             const guest = {
-                role: this.acl.updateRolePermissions({ name: guestRoleName } as IRole),
+                role: this.acl.updateRolePermissions({ name: guestRoleName }),
                 username: guestRoleName,
             } as IUser;
             res.json({ items: [guest] } as IResponse<IUser>);

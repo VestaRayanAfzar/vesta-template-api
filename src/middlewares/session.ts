@@ -7,7 +7,13 @@ export function sessionMiddleware(req: IExtRequest, res: Response, next: NextFun
     const token = req.get("X-Auth-Token");
     // if (!token) { return next(new Err(Err.Code.Unauthorized)); }
     if (!token) { return newSession(); }
-    JWT.verify(token, (err, payload: any) => err ? newSession() : restoreSession(payload.sessionId));
+    JWT.verify(token, (err, payload: any) => {
+        if (err) {
+            // return next(new Err(Err.Code.Token));
+            return newSession();
+        }
+        restoreSession(payload.sessionId);
+    });
 
     function newSession() {
         Session.create()
