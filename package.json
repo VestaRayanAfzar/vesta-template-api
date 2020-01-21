@@ -1,55 +1,58 @@
 {
-    "name": "vesta-template-api",
-    "version": "0.8.3",
-    "description": "Vesta boilerplate for applications backend",
-    "license": "Apache-2.0",
-    "author": "hbtb <bishehsary@gmail.com>",
-    "contributors": [{
-        "name": "Mohammd Javad Khalilian",
-        "email": "khalilian.javad@gmail.com"
-    }],
-    "scripts": {
-        "start": "tsc -w",
-        "deploy": "tsc",
-        "api": "gulp api"
-    },
-    "repository": "https://github.com/vestaBoot/vesta-template-api.git",
-    "bugs": {
-        "url": "https://github.com/vestaBoot/vesta-template-api/issues",
-        "email": "bishehsary@gmail.com"
-    },
-    "dependencies": {
-        "@vesta/core": "^2.0.13",
-        "@vesta/culture": "^0.1.1",
-        "@vesta/culture-ir": "^1.0.5",
-        "@vesta/culture-us": "^1.0.5",
-        "@vesta/driver-mysql": "^2.0.5",
-        "@vesta/driver-redis": "^1.0.0",
-        "@vesta/services": "^0.2.0",
-        "body-parser": "^1.19.0",
-        "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "formidable": "^1.2.1",
-        "helmet": "^3.21.2",
-        "jsonwebtoken": "^8.5.1",
-        "mkdirp": "^0.5.1",
-        "mysql": "^2.17.1",
-        "redis": "^2.8.0",
-        "uuid": "^3.3.3"
-    },
-    "devDependencies": {
-        "@types/body-parser": "^1.17.1",
-        "@types/express": "^4.17.2",
-        "@types/formidable": "^1.0.31",
-        "@types/jsonwebtoken": "^8.3.6",
-        "@types/mkdirp": "^0.5.2",
-        "@types/mysql": "^2.15.8",
-        "@types/node": "^13.1.7",
-        "@types/redis": "^2.8.14",
-        "@types/uuid": "^3.4.6",
-        "gulp": "^4.0.2",
-        "gulp-develop-server": "^0.5.2",
-        "tslint": "^5.20.1",
-        "typescript": "^3.7.4"
+  "name": "vesta-template-api",
+  "version": "0.8.3",
+  "description": "Vesta boilerplate for applications backend",
+  "license": "Apache-2.0",
+  "author": "hbtb <bishehsary@gmail.com>",
+  "contributors": [
+    {
+      "name": "Mohammd Javad Khalilian",
+      "email": "khalilian.javad@gmail.com"
     }
+  ],
+  "scripts": {
+    "start": "tsc -w",
+    "deploy": "tsc",
+    "api": "gulp api"
+  },
+  "repository": "https://github.com/vestaBoot/vesta-template-api.git",
+  "bugs": {
+    "url": "https://github.com/vestaBoot/vesta-template-api/issues",
+    "email": "bishehsary@gmail.com"
+  },
+  "dependencies": {
+    "@vesta/core": "^2.0.13",
+    "@vesta/culture": "^0.1.1",
+    "@vesta/culture-ir": "^1.0.5",
+    "@vesta/culture-us": "^1.0.5",
+    "@vesta/driver-mysql": "^2.0.5",
+    "@vesta/driver-redis": "^1.0.0",
+    "@vesta/services": "^0.2.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "formidable": "^1.2.1",
+    "helmet": "^3.21.2",
+    "jsonwebtoken": "^8.5.1",
+    "mkdirp": "^0.5.1",
+    "mysql": "^2.17.1",
+    "redis": "^2.8.0",
+    "tslint-config-prettier": "^1.18.0",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.17.1",
+    "@types/express": "^4.17.2",
+    "@types/formidable": "^1.0.31",
+    "@types/jsonwebtoken": "^8.3.6",
+    "@types/mkdirp": "^0.5.2",
+    "@types/mysql": "^2.15.8",
+    "@types/node": "^13.1.7",
+    "@types/redis": "^2.8.14",
+    "@types/uuid": "^3.4.6",
+    "gulp": "^4.0.2",
+    "gulp-develop-server": "^0.5.2",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
+  }
 }

@@ -1,17 +1,8 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {
-        "max-line-length": [
-            true,
-            160
-        ],
-        "arrow-parens": false,
-        "no-console": false,
-        "object-literal-sort-keys":false
-    },
-    "rulesDirectory": []
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "max-line-length": [true, 160]
+  },
+  "rulesDirectory": []
 }

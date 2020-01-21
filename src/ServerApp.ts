@@ -16,7 +16,6 @@ import { LogFactory } from "./helpers/LogFactory";
 import { loggerMiddleware } from "./middlewares/logger";
 import { sessionMiddleware } from "./middlewares/session";
 import { Session } from "./session/Session";
-import { Culture } from "@vesta/culture";
 
 export class ServerApp {
     private app: express.Express;
@@ -29,7 +28,7 @@ export class ServerApp {
         this.app = express();
         this.server = createServer(this.app);
         // tslint:disable-next-line:no-console
-        this.server.on("error", (err) => console.error(err));
+        this.server.on("error", err => console.error(err));
         this.acl = new Acl(config, AclPolicy.Deny);
         if (!LogFactory.init(this.config.log)) {
             process.exit(1);
@@ -47,24 +46,24 @@ export class ServerApp {
 
     public start() {
         return new Promise((resolve, reject) => {
-            this.server.listen(this.config.port)
-                .on("listening", (arg) => resolve(arg))
-                .on("error", (err) => resolve(err));
+            this.server
+                .listen(this.config.port)
+                .on("listening", arg => resolve(arg))
+                .on("error", err => resolve(err));
         });
     }
 
     private configExpressServer() {
-        this.app.use(helmet({
-            noCache: true,
-            referrerPolicy: true,
-        }));
+        this.app.use(helmet({ noCache: true, referrerPolicy: true }));
         // todo CHANGE origin in production mode based on your requirement
-        this.app.use(cors({
-            allowedHeaders: ["X-Requested-With", "Content-Type", "Content-Length", "X-Auth-Token"],
-            exposedHeaders: ["Content-Type", "Content-Length", "X-Auth-Token"],
-            methods: ["GET", "POST", "PUT", "DELETE"],
-            origin: [/https?:\/\/*:*/],
-        }));
+        this.app.use(
+            cors({
+                allowedHeaders: ["X-Requested-With", "Content-Type", "Content-Length", "X-Auth-Token"],
+                exposedHeaders: ["Content-Type", "Content-Length", "X-Auth-Token"],
+                methods: ["GET", "POST", "PUT", "DELETE"],
+                origin: [/https?:\/\/*:*/],
+            })
+        );
         this.app.use(urlencoded({ limit: "50mb", extended: false }));
         this.app.use(json({ limit: "50mb" }));
         // todo closing connection after sending response ???
@@ -83,6 +82,16 @@ export class ServerApp {
         if (this.config.env === "development") {
             this.app.use("/upl", express.static(this.config.dir.upload));
         }
+        // removing wrapper around query to preserve data type
+        this.app.use((req: IExtRequest, res, next) => {
+            if (req.query && req.query.wrapper) {
+                try {
+                    req.query = JSON.parse(req.query.wrapper);
+                } catch {}
+            }
+            next();
+        });
+        // attaching
         this.app.use((req: IExtRequest, res, next) => {
             req.sessionDB = this.sessionDatabase;
             sessionMiddleware(req, res, next);
@@ -103,7 +112,7 @@ export class ServerApp {
             this.handleError(req, res, err);
         });
         //
-        process.on("unhandledRejection", (reason) => {
+        process.on("unhandledRejection", reason => {
             // tslint:disable-next-line:no-console
             console.error("Unhandled Rejection:", reason);
         });
@@ -114,7 +123,7 @@ export class ServerApp {
         const modelFiles = readdirSync(modelsDirectory);
         const models: IModelCollection = {};
         // creating models list
-        for (let i = modelFiles.length; i--;) {
+        for (let i = modelFiles.length; i--; ) {
             if (modelFiles[i].endsWith(".js")) {
                 const modelName = modelFiles[i].slice(0, -3);
                 const model = require(`${modelsDirectory}/${modelFiles[i]}`);
