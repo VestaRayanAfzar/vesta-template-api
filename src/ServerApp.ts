@@ -16,6 +16,7 @@ import { LogFactory } from "./helpers/LogFactory";
 import { loggerMiddleware } from "./middlewares/logger";
 import { sessionMiddleware } from "./middlewares/session";
 import { Session } from "./session/Session";
+import { jwtMiddleware } from "./middlewares/jwt";
 
 export class ServerApp {
     private app: express.Express;
@@ -87,15 +88,13 @@ export class ServerApp {
             if (req.query && req.query.wrapper) {
                 try {
                     req.query = JSON.parse(req.query.wrapper);
-                } catch {}
+                } catch { }
             }
             next();
         });
-        // attaching
-        this.app.use((req: IExtRequest, res, next) => {
-            req.sessionDB = this.sessionDatabase;
-            sessionMiddleware(req, res, next);
-        });
+        // jwt middleware
+        this.app.use(jwtMiddleware);
+
         // logger must be set after session
         this.app.use(loggerMiddleware);
         const routing = await ApiFactory.create(this.config, this.acl, this.database);
@@ -123,7 +122,7 @@ export class ServerApp {
         const modelFiles = readdirSync(modelsDirectory);
         const models: IModelCollection = {};
         // creating models list
-        for (let i = modelFiles.length; i--; ) {
+        for (let i = modelFiles.length; i--;) {
             if (modelFiles[i].endsWith(".js")) {
                 const modelName = modelFiles[i].slice(0, -3);
                 const model = require(`${modelsDirectory}/${modelFiles[i]}`);

@@ -1,11 +1,11 @@
-import { DatabaseError, Err, IResponse, ValidationError } from "@vesta/core";
+import { Err, IResponse, ValidationError } from "@vesta/core";
 import { Culture } from "@vesta/culture";
 import { LogLevel } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
 import { IRole, Role } from "../../../cmn/models/Role";
 import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
 import { Hashing } from "../../../helpers/Hashing";
-import { Session } from "../../../session/Session";
+import { JWT } from "../../../helpers/JWT";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class AccountController extends BaseController {
@@ -14,6 +14,7 @@ export class AccountController extends BaseController {
 
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
+        router.get("/refresh", this.checkAcl("account", "refreshToken"), this.wrap(this.refreshToken));
         router.post("/account", this.checkAcl("account", "register"), this.wrap(this.register));
         router.post("/account/login", this.checkAcl("account", "login"), this.wrap(this.login));
         router.post("/account/forget", this.checkAcl("account", "forget"), this.wrap(this.forget));
@@ -98,23 +99,28 @@ export class AccountController extends BaseController {
         if (user.sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
             throw new Err(Err.Code.Forbidden, "err_none_user_login");
         }
-        req.session.destroy();
-        const session = await Session.create(req.body.rememberMe);
-        Session.setAuthToken(res, session.sessionId);
-        req.session = session;
-        req.session.set("user", user.getValues());
-        res.json({ items: [user] });
+        const token = JWT.sign({
+            user: {
+                id: user.id,
+                role: {
+                    id: (user.role as IRole).id,
+                    name: (user.role as IRole).name
+                },
+            }
+        },
+            this.config.security.expireTime)
+        res.json({ items: [user], token });
     }
 
     private async logout(req: IExtRequest, res: Response, next: NextFunction) {
-        const result = await User.find<IUser>(this.getUserFromSession(req).id);
-        if (result.items.length !== 1) {
-            throw new DatabaseError(Err.Code.DBNoRecord, null);
-        }
-        req.session.destroy();
-        const session = await Session.create();
-        Session.setAuthToken(res, session.sessionId);
-        await this.getMe(req, res, next);
+        // TODO:: handling session close if exist or logs o 
+        res.json({ result: "ok" })
+    }
+
+    private async refreshToken(req: IExtRequest, res: Response, next: NextFunction) {
+        const { auth } = req;
+        const token = JWT.sign(auth, this.config.security.expireTime)
+        res.json({ token });
     }
 
     private async forget(req: IExtRequest, res: Response, next: NextFunction) {
@@ -156,7 +162,7 @@ export class AccountController extends BaseController {
             }
         }
 
-        const user = this.getUserFromSession(req);
+        const user = this.getUser(req);
         if (user.id) {
             const result = await User.find<IUser>(user.id, { relations: ["role"] });
             result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);

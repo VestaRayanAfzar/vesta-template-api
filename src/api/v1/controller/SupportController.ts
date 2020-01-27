@@ -37,7 +37,7 @@ export class SupportController extends BaseController {
     }
 
     public async addSupport(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUserFromSession(req);
+        const authUser = this.getUser(req);
         const support = new Support(req.body);
         support.date = Date.now();
         support.name = authUser.username;

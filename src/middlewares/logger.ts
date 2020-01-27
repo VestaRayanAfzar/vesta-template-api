@@ -6,7 +6,7 @@ import { LogFactory } from "../helpers/LogFactory";
 
 export function loggerMiddleware(req: IExtRequest, res: Response, next: NextFunction) {
     const sourceApp = +(req.body.s || req.query.s);
-    const user = req.session.get<IUser>("user");
+    const { user } = req.auth;
     const log = LogFactory.create(user && user.id ? +user.id : 0);
     res.on("end", onAfterResponse);
     res.on("finish", onAfterResponse);

@@ -28,6 +28,7 @@ export interface ISecurityConfig {
     secret: string;
     session: ISessionConfig;
     userRoleName: string;
+    expireTime: number | string;
 }
 
 export interface IDirConfig {
@@ -92,6 +93,7 @@ const appConfig: IAppConfig = {
             maxAge: 0,
         },
         userRoleName: "user",
+        expireTime: env.JWT_EXPIRE_TIME
     },
     version: cmnConfig.version,
 };
