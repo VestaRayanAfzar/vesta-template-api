@@ -13,10 +13,9 @@ import { IAppConfig } from "./config";
 import { Acl } from "./helpers/Acl";
 import { DatabaseFactory } from "./helpers/DatabaseFactory";
 import { LogFactory } from "./helpers/LogFactory";
-import { loggerMiddleware } from "./middlewares/logger";
-import { sessionMiddleware } from "./middlewares/session";
-import { Session } from "./session/Session";
 import { jwtMiddleware } from "./middlewares/jwt";
+import { loggerMiddleware } from "./middlewares/logger";
+import { Session } from "./session/Session";
 
 export class ServerApp {
     private app: express.Express;

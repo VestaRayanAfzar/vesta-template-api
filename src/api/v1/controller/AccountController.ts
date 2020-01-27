@@ -162,7 +162,7 @@ export class AccountController extends BaseController {
             }
         }
 
-        const user = this.getUser(req);
+        const user = this.getUserFromReq(req);
         if (user.id) {
             const result = await User.find<IUser>(user.id, { relations: ["role"] });
             result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);

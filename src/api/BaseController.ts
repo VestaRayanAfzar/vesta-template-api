@@ -9,7 +9,7 @@ import { Session } from "../session/Session";
 
 export interface IExtRequest extends Request {
     log: LoggerFunction;
-    auth?: { user: IUser };
+    auth?: { user?: IUser };
     session: Session;
     sessionDB: KeyValueDatabase;
 }
@@ -50,7 +50,7 @@ export abstract class BaseController {
         return this.config.env === "production";
     }
 
-    protected getUser(req: IExtRequest): User {
+    protected getUserFromReq(req: IExtRequest): User {
         let { user } = req.auth;
         user = user || { role: { name: this.config.security.guestRoleName } } as IUser;
         // getting user sourceApp from POST/PUT body or GET/DELETE query
@@ -75,7 +75,7 @@ export abstract class BaseController {
         this.acl.addResource(resource, action);
         return (req: IExtRequest, res: Response, next: NextFunction) => {
             if (req.auth) {
-                const user = this.getUser(req);
+                const user = this.getUserFromReq(req);
                 if (this.acl.isAllowed((user.role as IRole).name, resource, action)) {
                     return next();
                 }

@@ -27,7 +27,7 @@ export class UserController extends BaseController {
     }
 
     public async getUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         const id = isAdmin ? this.retrieveId(req) : authUser.id;
         const result = await User.find<IUser>(id, { relations: ["role"] });
@@ -39,7 +39,7 @@ export class UserController extends BaseController {
     }
 
     public async getUsers(req: IExtRequest, res: Response) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
@@ -53,7 +53,7 @@ export class UserController extends BaseController {
     }
 
     public async addUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
@@ -73,7 +73,7 @@ export class UserController extends BaseController {
     }
 
     public async updateUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         const user = new User(req.body);
         user.mobile = user.mobile ? sanitizePhoneNumber(user.mobile) : null;

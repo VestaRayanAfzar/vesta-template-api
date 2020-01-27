@@ -52,6 +52,7 @@ services:
       ADB_NAME: vesta
       SALT: '__SALT__'
       SECRET_KEY: '__SECRET_KEY__'
+      JWT_EXPIRE_TIME : '1w'
     depends_on:
       - session
       - database

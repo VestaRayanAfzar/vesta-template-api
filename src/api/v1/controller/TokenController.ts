@@ -23,7 +23,7 @@ export class TokenController extends BaseController {
     }
 
     public async getToken(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         const id = this.retrieveId(req);
         const result = await Token.find<IToken>(id, { relations: ["user"] });
@@ -35,7 +35,7 @@ export class TokenController extends BaseController {
     }
 
     public async getTokens(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const isAdmin = this.isAdmin(authUser);
         const query = this.query2vql(Token, req.query);
         if (!isAdmin) {
@@ -49,7 +49,7 @@ export class TokenController extends BaseController {
     }
 
     public async addToken(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const token = new Token(req.body);
         token.user = authUser.id;
         const validationError = token.validate();
@@ -68,7 +68,7 @@ export class TokenController extends BaseController {
     }
 
     public async updateToken(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const token = new Token(req.body);
         token.user = authUser.id;
         //
@@ -89,7 +89,7 @@ export class TokenController extends BaseController {
     }
 
     public async removeToken(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUser(req);
+        const authUser = this.getUserFromReq(req);
         const iToken: IToken = { user: authUser.id, token: req.params.token };
         // todo add regex to token model for validation
         const result = await Token.find(iToken);
