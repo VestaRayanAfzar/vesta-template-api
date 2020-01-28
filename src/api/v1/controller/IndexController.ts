@@ -62,7 +62,7 @@ export class IndexController extends BaseController {
         code = [lang.toLocaleLowerCase(), country.toUpperCase()].join("-");
         Culture.setDefault(code);
         const locale = Culture.getLocale();
-        const user = this.getUserFromSession(req);
+        const user = this.getUserFromReq(req);
         if (user.id) {
             await user.update({ locale: locale.code });
         }

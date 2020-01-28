@@ -46,10 +46,7 @@ export class Session {
             }).catch((err) => null);
     }
 
-    public static setAuthToken(res: Response, sessionId: string, token?: string) {
-        token = token || JWT.sign({ sessionId });
-        res.set("X-Auth-Token", token);
-    }
+
 
     private static config: ISessionConfig;
     private static db: KeyValueDatabase;
