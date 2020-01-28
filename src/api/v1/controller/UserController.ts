@@ -9,7 +9,6 @@ import { Hashing } from "../../../helpers/Hashing";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class UserController extends BaseController {
-
     public route(router: Router) {
         router.get("/user/count", this.checkAcl("user", AclAction.Read), this.wrap(this.getUserCount));
         router.get("/user/:id", this.checkAcl("user", AclAction.Read), this.wrap(this.getUser));
@@ -27,7 +26,7 @@ export class UserController extends BaseController {
     }
 
     public async getUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUserFromReq(req);
+        const authUser = this.getAuthUser(req);
         const isAdmin = this.isAdmin(authUser);
         const id = isAdmin ? this.retrieveId(req) : authUser.id;
         const result = await User.find<IUser>(id, { relations: ["role"] });
@@ -39,21 +38,22 @@ export class UserController extends BaseController {
     }
 
     public async getUsers(req: IExtRequest, res: Response) {
-        const authUser = this.getUserFromReq(req);
+        const authUser = this.getAuthUser(req);
         const isAdmin = this.isAdmin(authUser);
+
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
         }
         const query = this.query2vql(User, req.query, false, true);
         const result = await User.find<IUser>(query);
-        for (let i = result.items.length; i--;) {
+        for (let i = result.items.length; i--; ) {
             delete result.items[i].password;
         }
         res.json(result);
     }
 
     public async addUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUserFromReq(req);
+        const authUser = this.getAuthUser(req);
         const isAdmin = this.isAdmin(authUser);
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
@@ -73,7 +73,7 @@ export class UserController extends BaseController {
     }
 
     public async updateUser(req: IExtRequest, res: Response) {
-        const authUser = this.getUserFromReq(req);
+        const authUser = this.getAuthUser(req);
         const isAdmin = this.isAdmin(authUser);
         const user = new User(req.body);
         user.mobile = user.mobile ? sanitizePhoneNumber(user.mobile) : null;

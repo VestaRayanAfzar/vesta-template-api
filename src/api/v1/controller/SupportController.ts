@@ -5,7 +5,6 @@ import { ISupport, Support } from "../../../cmn/models/Support";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class SupportController extends BaseController {
-
     public route(router: Router) {
         router.get("/support/count", this.checkAcl("support", AclAction.Read), this.wrap(this.getSupportCount));
         router.get("/support/:id", this.checkAcl("support", AclAction.Read), this.wrap(this.getSupport));
@@ -37,7 +36,7 @@ export class SupportController extends BaseController {
     }
 
     public async addSupport(req: IExtRequest, res: Response, next: NextFunction) {
-        const authUser = this.getUserFromReq(req);
+        const authUser = this.getAuthUser(req);
         const support = new Support(req.body);
         support.date = Date.now();
         support.name = authUser.username;

@@ -1,4 +1,4 @@
-import { Database, Err, IModelCollection, KeyValueDatabase } from "@vesta/core";
+import { Database, Err, IModelCollection } from "@vesta/core";
 import { MySQL } from "@vesta/driver-mysql";
 import { AclPolicy, LogLevel } from "@vesta/services";
 import { json, urlencoded } from "body-parser";
@@ -15,12 +15,11 @@ import { DatabaseFactory } from "./helpers/DatabaseFactory";
 import { LogFactory } from "./helpers/LogFactory";
 import { jwtMiddleware } from "./middlewares/jwt";
 import { loggerMiddleware } from "./middlewares/logger";
-import { Session } from "./session/Session";
 
 export class ServerApp {
     private app: express.Express;
     private server: Server;
-    private sessionDatabase: KeyValueDatabase;
+    // private sessionDatabase: KeyValueDatabase;
     private database: Database;
     private acl: Acl;
 
@@ -37,7 +36,7 @@ export class ServerApp {
 
     public async init(): Promise<void> {
         this.configExpressServer();
-        await Session.init(this.config.security.session);
+        // await Session.init(this.config.security.session);
         await this.initDatabase();
         await this.initRouting();
         this.initErrorHandlers();
@@ -58,7 +57,7 @@ export class ServerApp {
         // todo CHANGE origin in production mode based on your requirement
         this.app.use(
             cors({
-                allowedHeaders: ["X-Requested-With", "Content-Type", "Content-Length", "X-Auth-Token"],
+                allowedHeaders: ["X-Requested-With", "Content-Type", "Content-Length", "X-Auth-Token", "From"],
                 exposedHeaders: ["Content-Type", "Content-Length", "X-Auth-Token"],
                 methods: ["GET", "POST", "PUT", "DELETE"],
                 origin: [/https?:\/\/*:*/],
@@ -87,7 +86,7 @@ export class ServerApp {
             if (req.query && req.query.wrapper) {
                 try {
                     req.query = JSON.parse(req.query.wrapper);
-                } catch { }
+                } catch {}
             }
             next();
         });
@@ -121,7 +120,7 @@ export class ServerApp {
         const modelFiles = readdirSync(modelsDirectory);
         const models: IModelCollection = {};
         // creating models list
-        for (let i = modelFiles.length; i--;) {
+        for (let i = modelFiles.length; i--; ) {
             if (modelFiles[i].endsWith(".js")) {
                 const modelName = modelFiles[i].slice(0, -3);
                 const model = require(`${modelsDirectory}/${modelFiles[i]}`);

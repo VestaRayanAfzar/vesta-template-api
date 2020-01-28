@@ -5,12 +5,11 @@ import { IUser, SourceApp, User, UserType } from "../cmn/models/User";
 import { IAppConfig } from "../config";
 import { Acl } from "../helpers/Acl";
 import { LoggerFunction } from "../helpers/Logger";
-import { Session } from "../session/Session";
 
 export interface IExtRequest extends Request {
     log: LoggerFunction;
     auth?: { user?: IUser };
-    session: Session;
+    // session: Session;
     sessionDB: KeyValueDatabase;
 }
 
@@ -50,11 +49,11 @@ export abstract class BaseController {
         return this.config.env === "production";
     }
 
-    protected getUserFromReq(req: IExtRequest): User {
+    protected getAuthUser(req: IExtRequest): User {
         let { user } = req.auth;
-        user = user || { role: { name: this.config.security.guestRoleName } } as IUser;
+        user = user || { role: { name: this.config.security.guestRoleName } };
         // getting user sourceApp from POST/PUT body or GET/DELETE query
-        user.sourceApp = +(req.body.s || req.query.s);
+        user.sourceApp = +req.get("From");
         return new User(user);
     }
 
@@ -75,7 +74,7 @@ export abstract class BaseController {
         this.acl.addResource(resource, action);
         return (req: IExtRequest, res: Response, next: NextFunction) => {
             if (req.auth) {
-                const user = this.getUserFromReq(req);
+                const user = this.getAuthUser(req);
                 if (this.acl.isAllowed((user.role as IRole).name, resource, action)) {
                     return next();
                 }
@@ -95,7 +94,7 @@ export abstract class BaseController {
     protected query2vql<T>(modelClass: IModel, req: IRequest<T>, isCounting?: boolean, isSearch?: boolean): Vql {
         const fields = [];
         if (req.query) {
-            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
+            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--; ) {
                 if (fieldNames[i] in req.query) {
                     fields.push(fieldNames[i]);
                 }
@@ -108,7 +107,7 @@ export abstract class BaseController {
         if (fields.length) {
             const model = new modelClass(req.query);
             // todo: checking for range from - to / validation
-            const rangeCondition = this.checkRangeAndBuildQuery(fields, req.query);
+            const rangeCondition = this.checkRangeAndBuildQuery(fields, req.query as any);
             if (rangeCondition) {
                 query.where(rangeCondition);
             } else {
@@ -143,7 +142,7 @@ export abstract class BaseController {
         const query: IQueryOption = {};
         const fields = [];
         if (req.query) {
-            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
+            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--; ) {
                 if (fieldNames[i] in req.query) {
                     fields.push(fieldNames[i]);
                 }
@@ -182,7 +181,7 @@ export abstract class BaseController {
         };
     }
 
-    protected checkRangeAndBuildQuery(fields: string[], filter: Object): Condition | null {
+    protected checkRangeAndBuildQuery(fields: string[], filter: object): Condition | null {
         let hasComplex = false;
         const conditions: Condition[] = [];
         for (let i = 0, il = fields.length; i < il; ++i) {

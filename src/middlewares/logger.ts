@@ -5,7 +5,7 @@ import { IUser, SourceApp } from "../cmn/models/User";
 import { LogFactory } from "../helpers/LogFactory";
 
 export function loggerMiddleware(req: IExtRequest, res: Response, next: NextFunction) {
-    const sourceApp = +(req.body.s || req.query.s);
+    const sourceApp = +req.get("From");
     const { user } = req.auth;
     const log = LogFactory.create(user && user.id ? +user.id : 0);
     res.on("end", onAfterResponse);
@@ -14,11 +14,7 @@ export function loggerMiddleware(req: IExtRequest, res: Response, next: NextFunc
     next();
 
     function onAfterResponse() {
-        const message = [
-            req.headers["X-Real-IP"] || req.ip,
-            `${req.method} ${req.url} ${res.statusCode}`,
-            req.headers["user-agent"],
-        ];
+        const message = [req.headers["X-Real-IP"] || req.ip, `${req.method} ${req.url} ${res.statusCode}`, req.headers["user-agent"]];
         if (sourceApp !== SourceApp.Panel) {
             // saving request information
             log.log(LogLevel.Info, message.join("-;-"), "loggerMiddleware");

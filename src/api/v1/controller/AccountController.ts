@@ -1,4 +1,4 @@
-import { Err, IResponse, ValidationError } from "@vesta/core";
+import { Err, ValidationError } from "@vesta/core";
 import { Culture } from "@vesta/culture";
 import { LogLevel } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
@@ -9,12 +9,10 @@ import { JWT } from "../../../helpers/JWT";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class AccountController extends BaseController {
-
     private tr = Culture.getDictionary().translate;
 
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
-        router.get("/refresh", this.checkAcl("account", "refreshToken"), this.wrap(this.refreshToken));
         router.post("/account", this.checkAcl("account", "register"), this.wrap(this.register));
         router.post("/account/login", this.checkAcl("account", "login"), this.wrap(this.login));
         router.post("/account/forget", this.checkAcl("account", "forget"), this.wrap(this.forget));
@@ -23,7 +21,7 @@ export class AccountController extends BaseController {
 
     private async register(req: IExtRequest, res: Response, next: NextFunction) {
         let userExists = false;
-        const sourceApp = req.body.s;
+        const sourceApp = +req.get("From");
         if (sourceApp !== SourceApp.EndUser) {
             throw new Err(Err.Code.Forbidden);
         }
@@ -58,17 +56,17 @@ export class AccountController extends BaseController {
             user.password = Hashing.withSalt(user.password);
             user.type = [UserType.User];
         }
-        const role = await Role.find<IRole>({ name: userRoleName } as IRole);
+        const role = await Role.find<IRole>({ name: userRoleName });
         if (!role.items.length) {
             throw new Err(Err.Code.Server, "err_no_role");
         }
         user.role = role.items[0].id;
-        const result = userExists ? await user.update<IUser>() : await user.insert<IUser>();
+        userExists ? await user.update<IUser>() : await user.insert<IUser>();
         return res.json({});
     }
 
     private async login(req: IExtRequest, res: Response, next: NextFunction) {
-        const sourceApp = req.body.s;
+        const sourceApp = +req.get("From");
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.NotAllowed);
         }
@@ -78,8 +76,7 @@ export class AccountController extends BaseController {
             throw new ValidationError(validationError);
         }
         user.password = Hashing.withSalt(user.password);
-        const result = await User.find<IUser>({ username: user.username, password: user.password } as IUser,
-            { relations: ["role"] });
+        const result = await User.find<IUser>({ username: user.username, password: user.password }, { relations: ["role"] });
         if (result.items.length !== 1) {
             throw new Err(Err.Code.DBNoRecord);
         }
@@ -99,32 +96,18 @@ export class AccountController extends BaseController {
         if (user.sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
             throw new Err(Err.Code.Forbidden, "err_none_user_login");
         }
-        const token = JWT.sign({
-            user: {
-                id: user.id,
-                role: {
-                    id: (user.role as IRole).id,
-                    name: (user.role as IRole).name
-                },
-            }
-        },
-            this.config.security.expireTime)
-        res.json({ items: [user], token });
-    }
-
-    private async logout(req: IExtRequest, res: Response, next: NextFunction) {
-        // TODO:: handling session close if exist or logs o 
-        res.json({ result: "ok" })
-    }
-
-    private async refreshToken(req: IExtRequest, res: Response, next: NextFunction) {
-        const { auth } = req;
-        const token = JWT.sign(auth, this.config.security.expireTime)
+        const token = JWT.sign({ user }, this.config.security.expireTime);
         res.json({ token });
     }
 
+    private async logout(req: IExtRequest, res: Response, next: NextFunction) {
+        // TODO:: handling session close if exist or logs o
+        req.auth = {};
+        return this.getMe(req, res, next);
+    }
+
     private async forget(req: IExtRequest, res: Response, next: NextFunction) {
-        const sourceApp = req.body.s;
+        const sourceApp = +req.get("From");
         if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
             throw new Err(Err.Code.Forbidden);
         }
@@ -133,13 +116,13 @@ export class AccountController extends BaseController {
         if (validationError) {
             throw new ValidationError(validationError);
         }
-        const result = await User.find<IUser>({ mobile: user.mobile } as IUser);
+        const result = await User.find<IUser>({ mobile: user.mobile });
         if (result.items.length !== 1) {
             throw new ValidationError({ mobile: "invalid" });
         }
         user.setValues(result.items[0]);
         // enumeration possibility
-        const randomNumber = Hashing.randomInt();
+        // const randomNumber = Hashing.randomInt();
         // const sms = await TextMessage.getInstance()
         //     .sendMessage(`${this.tr("msg_reset_pass", randomNumber)}`, result.items[0].mobile);
         // if (sms.RetStatus === 1) {
@@ -153,8 +136,7 @@ export class AccountController extends BaseController {
     }
 
     private async getMe(req: IExtRequest, res: Response, next: NextFunction) {
-
-        const sourceApp = +req.query.s;
+        const sourceApp = +req.get("From");
 
         if (this.isProduction) {
             if ([SourceApp.EndUser, SourceApp.Panel].indexOf(sourceApp) < 0) {
@@ -162,19 +144,22 @@ export class AccountController extends BaseController {
             }
         }
 
-        const user = this.getUserFromReq(req);
+        const user = this.getAuthUser(req);
         if (user.id) {
+            const token = JWT.sign({ user }, this.config.security.expireTime);
+            res.json({ token });
             const result = await User.find<IUser>(user.id, { relations: ["role"] });
             result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
             delete result.items[0].password;
+            result.token = token;
             res.json(result);
         } else {
             const { guestRoleName } = this.config.security;
             const guest = {
                 role: this.acl.updateRolePermissions({ name: guestRoleName }),
                 username: guestRoleName,
-            } as IUser;
-            res.json({ items: [guest] } as IResponse<IUser>);
+            };
+            res.json({ items: [guest] });
         }
     }
 }

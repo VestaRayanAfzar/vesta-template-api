@@ -5,7 +5,6 @@ import { access } from "fs";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class IndexController extends BaseController {
-
     public route(router: Router): void {
         router.get("/", this.wrap(this.sayHi));
         // router.get("/notif", this.wrap(this.sendNotif));
@@ -44,7 +43,7 @@ export class IndexController extends BaseController {
         langCode = langCode.split("-")[1];
         langCode = `${langCode[0].toUpperCase()}${langCode[1].toLowerCase()}`;
         const lngPath = `${this.config.dir.root}/cmn/vocabs/${langCode}Vocabs.js`;
-        access(lngPath, (error) => {
+        access(lngPath, error => {
             if (error) {
                 return next(new Err(Err.Code.NotAllowed, `Invalid language: ${langCode}`));
             }
@@ -62,7 +61,7 @@ export class IndexController extends BaseController {
         code = [lang.toLocaleLowerCase(), country.toUpperCase()].join("-");
         Culture.setDefault(code);
         const locale = Culture.getLocale();
-        const user = this.getUserFromReq(req);
+        const user = this.getAuthUser(req);
         if (user.id) {
             await user.update({ locale: locale.code });
         }
