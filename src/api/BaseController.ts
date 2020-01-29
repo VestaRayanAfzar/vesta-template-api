@@ -51,7 +51,7 @@ export abstract class BaseController {
 
     protected getAuthUser(req: IExtRequest): User {
         let { user } = req.auth;
-        user = user || { role: { name: this.config.security.guestRoleName } };
+        user = user || ({ role: { name: this.config.security.guestRoleName } } as IUser);
         // getting user sourceApp from POST/PUT body or GET/DELETE query
         user.sourceApp = +req.get("From");
         return new User(user);

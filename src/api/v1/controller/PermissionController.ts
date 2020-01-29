@@ -5,7 +5,6 @@ import { IPermission, Permission } from "../../../cmn/models/Permission";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class PermissionController extends BaseController {
-
     public route(router: Router) {
         // tslint:disable-next-line:max-line-length
         router.get("/acl/permission/:id", this.checkAcl("acl.permission", AclAction.Read), this.wrap(this.getPermission));
@@ -36,7 +35,6 @@ export class PermissionController extends BaseController {
         }
         const result = await Permission.find<IPermission>(permission.id);
         if (result.items.length === 1) {
-            result.items[0].status = permission.status;
             permission.setValues(result.items[0]);
             const pResult = await permission.update();
             await this.acl.initAcl();

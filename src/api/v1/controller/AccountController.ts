@@ -56,7 +56,7 @@ export class AccountController extends BaseController {
             user.password = Hashing.withSalt(user.password);
             user.type = [UserType.User];
         }
-        const role = await Role.find<IRole>({ name: userRoleName });
+        const role = await Role.find<IRole>({ name: userRoleName } as IRole);
         if (!role.items.length) {
             throw new Err(Err.Code.Server, "err_no_role");
         }
@@ -156,7 +156,7 @@ export class AccountController extends BaseController {
         } else {
             const { guestRoleName } = this.config.security;
             const guest = {
-                role: this.acl.updateRolePermissions({ name: guestRoleName }),
+                role: this.acl.updateRolePermissions({ name: guestRoleName } as IRole),
                 username: guestRoleName,
             };
             res.json({ items: [guest] });

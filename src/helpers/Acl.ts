@@ -1,6 +1,5 @@
 import { Hlc as C, Vql } from "@vesta/core";
 import { AclAction, AclPolicy } from "@vesta/services";
-import { Status } from "../cmn/enum/Status";
 import { IPermission, Permission } from "../cmn/models/Permission";
 import { IRole, Role } from "../cmn/models/Role";
 import { IAppConfig } from "../config";
@@ -22,8 +21,7 @@ export class Acl {
     /** This is the {roleName: [IPermission]}, a collection of all roles */
     private roles: IRolesList = {};
 
-    constructor(private config: IAppConfig, private defaultPolicy: AclPolicy) {
-    }
+    constructor(private config: IAppConfig, private defaultPolicy: AclPolicy) {}
 
     /**
      * Checks if a role has access to specific action on resource
@@ -32,10 +30,12 @@ export class Acl {
         if (!(role in this.roles)) {
             return this.defaultPolicy === AclPolicy.Allow;
         }
-        for (let i = this.roles[role].length; i--;) {
+        for (let i = this.roles[role].length; i--; ) {
             const permission = this.roles[role][i];
             if (permission.resource === "*" || permission.resource === resource) {
-                if (permission.action === "*" || permission.action === action) { return true; }
+                if (permission.action === "*" || permission.action === action) {
+                    return true;
+                }
             }
         }
         return false;
@@ -70,10 +70,10 @@ export class Acl {
         for (let i = 0, appResources = Object.keys(this.resourceList), il = appResources.length; i < il; ++i) {
             const appResource = appResources[i];
             const appActions = this.resourceList[appResource];
-            for (let j = appActions.length; j--;) {
+            for (let j = appActions.length; j--; ) {
                 const appAction = appActions[j];
                 let found = false;
-                for (let k = dbPermissions.length; k--;) {
+                for (let k = dbPermissions.length; k--; ) {
                     const dbResource = dbPermissions[k].resource;
                     const dbAction = dbPermissions[k].action;
                     if (appResource === dbResource && appAction === dbAction) {
@@ -82,7 +82,7 @@ export class Acl {
                     }
                 }
                 if (!found) {
-                    newPermissions.push({ action: appAction, resource: appResource, status: Status.Active });
+                    newPermissions.push({ action: appAction, resource: appResource });
                 }
             }
         }
@@ -91,7 +91,7 @@ export class Acl {
         }
         // Finding deprecated permissions to be deleted from database
         const deprecatedPermissions = [];
-        for (let i = dbPermissions.length; i--;) {
+        for (let i = dbPermissions.length; i--; ) {
             const dbResource = dbPermissions[i].resource;
             const dbAction = dbPermissions[i].action;
             if (!this.resourceList[dbResource] || this.resourceList[dbResource].indexOf(dbAction) < 0) {
@@ -99,13 +99,13 @@ export class Acl {
             }
         }
         if (deprecatedPermissions.length) {
-            const conditions = deprecatedPermissions.map((id) => C.eq("id", id));
+            const conditions = deprecatedPermissions.map(id => C.eq("id", id));
             updateOperations.push(Permission.remove(C.or(...conditions)));
         }
         // waiting for operations to finish
         if (updateOperations.length) {
             return Promise.all(updateOperations)
-                .then(async () => this.config.regenerateSchema ? await populate() : null)
+                .then(async () => (this.config.regenerateSchema ? await populate() : null))
                 .then(() => this.loadRoles());
         }
         return this.loadRoles();
@@ -132,22 +132,24 @@ export class Acl {
         if (!(role in this.roles)) {
             this.roles[role] = [];
         }
-        this.roles[role].push({ resource, action } as IPermission);
+        this.roles[role].push({ resource, action });
     }
 
     /**
      * Enabling access of a role to a resource by calling `this.allow` -> this.roles
      */
     private update(roles: IRole[]) {
-        if (!roles || !roles.length) { return; }
+        if (!roles || !roles.length) {
+            return;
+        }
         for (let i = 0, il = roles.length; i < il; ++i) {
             const role = roles[i];
-            if (!role.status) { continue; }
-            for (let j = role.permissions.length; j--;) {
+            if (!role.status) {
+                continue;
+            }
+            for (let j = role.permissions.length; j--; ) {
                 const permission: IPermission = role.permissions[j] as IPermission;
-                if (permission.status) {
-                    this.allow(role.name, permission.resource, permission.action);
-                }
+                this.allow(role.name, permission.resource, permission.action);
             }
         }
     }
@@ -158,6 +160,6 @@ export class Acl {
     private loadRoles() {
         const roleQuery = new Vql(Role.schema.name);
         roleQuery.fetchRecordFor("permissions");
-        return Role.find<IRole>(roleQuery).then((result) => this.update(result.items));
+        return Role.find<IRole>(roleQuery).then(result => this.update(result.items));
     }
 }
