@@ -2,14 +2,6 @@ version: '2'
 
 services:
 
-  session:
-    image: redis
-    restart: always
-    volumes:
-      - /vesta/redis:/data
-    networks:
-      - network
-
   database:
     image: mysql:5.7.22
     restart: always
@@ -41,9 +33,6 @@ services:
       NODE_ENV: production
       LOG_LEVEL: 3
       PORT: 3000
-      SDB_PROTOCOL: redis
-      SDB_HOST: session
-      SDB_PORT: 6379
       ADB_PROTOCOL: mysql
       ADB_HOST: database
       ADB_PORT: 3306
@@ -53,7 +42,6 @@ services:
       SALT: '__SALT__'
       SECRET_KEY: '__SECRET_KEY__'
     depends_on:
-      - session
       - database
 
 networks:

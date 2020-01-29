@@ -94,7 +94,7 @@ export abstract class BaseController {
     protected query2vql<T>(modelClass: IModel, req: IRequest<T>, isCounting?: boolean, isSearch?: boolean): Vql {
         const fields = [];
         if (req.query) {
-            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--; ) {
+            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
                 if (fieldNames[i] in req.query) {
                     fields.push(fieldNames[i]);
                 }
@@ -142,7 +142,7 @@ export abstract class BaseController {
         const query: IQueryOption = {};
         const fields = [];
         if (req.query) {
-            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--; ) {
+            for (let fieldNames = modelClass.schema.getFieldsNames(), i = fieldNames.length; i--;) {
                 if (fieldNames[i] in req.query) {
                     fields.push(fieldNames[i]);
                 }

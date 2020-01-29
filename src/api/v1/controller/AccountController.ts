@@ -1,5 +1,4 @@
 import { Err, ValidationError } from "@vesta/core";
-import { Culture } from "@vesta/culture";
 import { LogLevel } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
 import { IRole, Role } from "../../../cmn/models/Role";
@@ -9,7 +8,6 @@ import { JWT } from "../../../helpers/JWT";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class AccountController extends BaseController {
-    private tr = Culture.getDictionary().translate;
 
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
@@ -82,22 +80,22 @@ export class AccountController extends BaseController {
         }
         result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
         user.setValues(result.items[0]);
-        user.sourceApp = sourceApp;
+        // user.sourceApp = sourceApp;
         delete user.password;
         // prevent admin from logging into application
         if (this.isAdmin(user) && user.sourceApp !== SourceApp.Panel) {
             throw new Err(Err.Code.Forbidden, "err_admin_login");
         }
         // prevent other users from logging into panel
-        if (user.sourceApp === SourceApp.Panel && !user.isOfType(UserType.Admin)) {
+        if (sourceApp === SourceApp.Panel && !user.isOfType(UserType.Admin)) {
             throw new Err(Err.Code.Forbidden, "err_user_admin_login");
         }
         // prevent none user from logging into user app
-        if (user.sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
+        if (sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
             throw new Err(Err.Code.Forbidden, "err_none_user_login");
         }
-        const token = JWT.sign({ user }, this.config.security.expireTime);
-        res.json({ token });
+        const token = JWT.sign({ user: this.getUserDataForSigning(user) }, this.config.security.expireTime);
+        res.json({ items: [user], token });
     }
 
     private async logout(req: IExtRequest, res: Response, next: NextFunction) {
@@ -146,20 +144,26 @@ export class AccountController extends BaseController {
 
         const user = this.getAuthUser(req);
         if (user.id) {
-            const token = JWT.sign({ user }, this.config.security.expireTime);
-            res.json({ token });
-            const result = await User.find<IUser>(user.id, { relations: ["role"] });
-            result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
-            delete result.items[0].password;
-            result.token = token;
-            res.json(result);
-        } else {
-            const { guestRoleName } = this.config.security;
-            const guest = {
-                role: this.acl.updateRolePermissions({ name: guestRoleName } as IRole),
-                username: guestRoleName,
-            };
-            res.json({ items: [guest] });
+            const { items } = await User.find<IUser>(user.id, { relations: ["role"] });
+            delete items[0].password;
+            items[0].role = this.acl.updateRolePermissions(items[0].role as IRole);
+            const token = JWT.sign({ user: this.getUserDataForSigning(items[0]) }, this.config.security.expireTime);
+            return res.json({ items, token });
+        }
+        // guest user
+        const { guestRoleName } = this.config.security;
+        const guest = {
+            role: this.acl.updateRolePermissions({ name: guestRoleName } as IRole),
+            username: guestRoleName,
+        };
+        res.json({ items: [guest] });
+    }
+
+    private getUserDataForSigning(user: IUser) {
+        return {
+            id: user.id,
+            role: user.role,
+            type: user.type,
         }
     }
 }

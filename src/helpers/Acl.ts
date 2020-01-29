@@ -21,7 +21,7 @@ export class Acl {
     /** This is the {roleName: [IPermission]}, a collection of all roles */
     private roles: IRolesList = {};
 
-    constructor(private config: IAppConfig, private defaultPolicy: AclPolicy) {}
+    constructor(private config: IAppConfig, private defaultPolicy: AclPolicy) { }
 
     /**
      * Checks if a role has access to specific action on resource
@@ -30,7 +30,7 @@ export class Acl {
         if (!(role in this.roles)) {
             return this.defaultPolicy === AclPolicy.Allow;
         }
-        for (let i = this.roles[role].length; i--; ) {
+        for (let i = this.roles[role].length; i--;) {
             const permission = this.roles[role][i];
             if (permission.resource === "*" || permission.resource === resource) {
                 if (permission.action === "*" || permission.action === action) {
@@ -70,10 +70,10 @@ export class Acl {
         for (let i = 0, appResources = Object.keys(this.resourceList), il = appResources.length; i < il; ++i) {
             const appResource = appResources[i];
             const appActions = this.resourceList[appResource];
-            for (let j = appActions.length; j--; ) {
+            for (let j = appActions.length; j--;) {
                 const appAction = appActions[j];
                 let found = false;
-                for (let k = dbPermissions.length; k--; ) {
+                for (let k = dbPermissions.length; k--;) {
                     const dbResource = dbPermissions[k].resource;
                     const dbAction = dbPermissions[k].action;
                     if (appResource === dbResource && appAction === dbAction) {
@@ -91,7 +91,7 @@ export class Acl {
         }
         // Finding deprecated permissions to be deleted from database
         const deprecatedPermissions = [];
-        for (let i = dbPermissions.length; i--; ) {
+        for (let i = dbPermissions.length; i--;) {
             const dbResource = dbPermissions[i].resource;
             const dbAction = dbPermissions[i].action;
             if (!this.resourceList[dbResource] || this.resourceList[dbResource].indexOf(dbAction) < 0) {
@@ -118,9 +118,7 @@ export class Acl {
         if (!(role.name in this.roles)) {
             return role;
         }
-        const clone: IRole = JSON.parse(JSON.stringify(role));
-        clone.permissions = this.roles[role.name];
-        return clone;
+        return { ...role, permissions: this.roles[role.name] };
     }
 
     /**
@@ -147,7 +145,7 @@ export class Acl {
             if (!role.status) {
                 continue;
             }
-            for (let j = role.permissions.length; j--; ) {
+            for (let j = role.permissions.length; j--;) {
                 const permission: IPermission = role.permissions[j] as IPermission;
                 this.allow(role.name, permission.resource, permission.action);
             }
