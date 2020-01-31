@@ -27,7 +27,7 @@ export class UserController extends BaseController {
 
     public async getUser(req: IExtRequest, res: Response) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
         const id = isAdmin ? this.retrieveId(req) : authUser.id;
         const result = await User.find<IUser>(id, { relations: ["role"] });
         if (result.items.length === 1) {
@@ -39,14 +39,14 @@ export class UserController extends BaseController {
 
     public async getUsers(req: IExtRequest, res: Response) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
 
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
         }
         const query = this.query2vql(User, req.query, false, true);
         const result = await User.find<IUser>(query);
-        for (let i = result.items.length; i--; ) {
+        for (let i = result.items.length; i--;) {
             delete result.items[i].password;
         }
         res.json(result);
@@ -54,7 +54,7 @@ export class UserController extends BaseController {
 
     public async addUser(req: IExtRequest, res: Response) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
         if (!isAdmin) {
             throw new Err(Err.Code.Forbidden);
         }
@@ -74,7 +74,7 @@ export class UserController extends BaseController {
 
     public async updateUser(req: IExtRequest, res: Response) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
         const user = new User(req.body);
         user.mobile = user.mobile ? sanitizePhoneNumber(user.mobile) : null;
         if (!isAdmin) {

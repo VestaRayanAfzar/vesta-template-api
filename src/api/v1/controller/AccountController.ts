@@ -1,8 +1,9 @@
 import { Err, ValidationError } from "@vesta/core";
 import { LogLevel } from "@vesta/services";
 import { NextFunction, Response, Router } from "express";
+import { SourceApp } from "../../../cmn/enum/SourceApp";
 import { IRole, Role } from "../../../cmn/models/Role";
-import { IUser, SourceApp, User, UserType } from "../../../cmn/models/User";
+import { IUser, User, UserType } from "../../../cmn/models/User";
 import { Hashing } from "../../../helpers/Hashing";
 import { JWT } from "../../../helpers/JWT";
 import { BaseController, IExtRequest } from "../../BaseController";
@@ -80,10 +81,9 @@ export class AccountController extends BaseController {
         }
         result.items[0].role = this.acl.updateRolePermissions(result.items[0].role as IRole);
         user.setValues(result.items[0]);
-        // user.sourceApp = sourceApp;
         delete user.password;
         // prevent admin from logging into application
-        if (this.isAdmin(user) && user.sourceApp !== SourceApp.Panel) {
+        if (this.isAdmin(user, sourceApp) && sourceApp !== SourceApp.Panel) {
             throw new Err(Err.Code.Forbidden, "err_admin_login");
         }
         // prevent other users from logging into panel

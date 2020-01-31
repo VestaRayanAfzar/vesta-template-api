@@ -1,7 +1,7 @@
 import { LogLevel } from "@vesta/services";
 import { NextFunction, Response } from "express";
 import { IExtRequest } from "../api/BaseController";
-import { IUser, SourceApp } from "../cmn/models/User";
+import { SourceApp } from "../cmn/enum/SourceApp";
 import { LogFactory } from "../helpers/LogFactory";
 
 export function loggerMiddleware(req: IExtRequest, res: Response, next: NextFunction) {

@@ -1,15 +1,16 @@
 import { Condition, Database, Err, Hlc, IModel, IQueryOption, IRequest, KeyValueDatabase, ValidationError, Vql } from "@vesta/core";
 import { NextFunction, Request, Response, Router } from "express";
+import { SourceApp } from "../cmn/enum/SourceApp";
 import { IRole } from "../cmn/models/Role";
-import { IUser, SourceApp, User, UserType } from "../cmn/models/User";
+import { IUser, User, UserType } from "../cmn/models/User";
 import { IAppConfig } from "../config";
 import { Acl } from "../helpers/Acl";
 import { LoggerFunction } from "../helpers/Logger";
+import { IJWTPayload } from "../middlewares/jwt";
 
 export interface IExtRequest extends Request {
     log: LoggerFunction;
-    auth?: { user?: IUser };
-    // session: Session;
+    auth?: IJWTPayload;
     sessionDB: KeyValueDatabase;
 }
 
@@ -51,15 +52,14 @@ export abstract class BaseController {
 
     protected getAuthUser(req: IExtRequest): User {
         let { user } = req.auth;
+        // tslint:disable-next-line: no-object-literal-type-assertion
         user = user || ({ role: { name: this.config.security.guestRoleName } } as IUser);
-        // getting user sourceApp from POST/PUT body or GET/DELETE query
-        user.sourceApp = +req.get("From");
         return new User(user);
     }
 
-    protected isAdmin(user: User): boolean {
+    protected isAdmin(user: User, sourceApp: SourceApp): boolean {
         try {
-            return user.isOfType(UserType.Admin) && user.sourceApp === SourceApp.Panel;
+            return user.isOfType(UserType.Admin) && sourceApp === SourceApp.Panel;
         } catch (e) {
             return false;
         }

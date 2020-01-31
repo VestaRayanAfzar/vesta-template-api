@@ -1,7 +1,7 @@
 import { Err } from "@vesta/core";
 import { request } from "https";
+import { SourceApp } from "../cmn/enum/SourceApp";
 import { IToken, Token } from "../cmn/models/Token";
-import { SourceApp } from "../cmn/models/User";
 
 export class Notification {
 
@@ -22,7 +22,7 @@ export class Notification {
     }
 
     public async sendMessage(userId: number, message: string, sourceApp: SourceApp, data?: any) {
-        const result = await Token.find<IToken>({ user: userId } as IToken);
+        const result = await Token.find<IToken>({ user: userId });
         if (!result.items.length) {
             throw new Err(Err.Code.Token);
         }

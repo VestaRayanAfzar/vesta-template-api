@@ -23,7 +23,7 @@ export class TokenController extends BaseController {
 
     public async getToken(req: IExtRequest, res: Response, next: NextFunction) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
         const id = this.retrieveId(req);
         const result = await Token.find<IToken>(id, { relations: ["user"] });
         if (result.items.length !== 1 || (!isAdmin && (result.items[0].user as IUser).id !== authUser.id)) {
@@ -35,13 +35,13 @@ export class TokenController extends BaseController {
 
     public async getTokens(req: IExtRequest, res: Response, next: NextFunction) {
         const authUser = this.getAuthUser(req);
-        const isAdmin = this.isAdmin(authUser);
+        const isAdmin = this.isAdmin(authUser, +req.get("From"));
         const query = this.query2vql(Token, req.query);
         if (!isAdmin) {
             query.filter({ user: authUser.id });
         }
         const result = await Token.find<IToken>(query);
-        for (let i = result.items.length; i--; ) {
+        for (let i = result.items.length; i--;) {
             delete (result.items[i].user as IUser).password;
         }
         res.json(result);

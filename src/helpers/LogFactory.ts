@@ -1,7 +1,7 @@
 import { appendFile, existsSync, writeFileSync } from "fs";
+import { SourceApp } from "../cmn/enum/SourceApp";
 import { ILogger } from "../cmn/interfaces/Logger";
 import { ILog } from "../cmn/models/Log";
-import { SourceApp } from "../cmn/models/User";
 import { ILogConfig } from "../config";
 import { Logger } from "./Logger";
 

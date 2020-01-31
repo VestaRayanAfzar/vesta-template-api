@@ -1,7 +1,7 @@
 import { LogLevel } from "@vesta/services";
+import { SourceApp } from "../cmn/enum/SourceApp";
 import { ILogger } from "../cmn/interfaces/Logger";
 import { ILog } from "../cmn/models/Log";
-import { SourceApp } from "../cmn/models/User";
 import { LogFactory } from "./LogFactory";
 
 export type LoggerFunction = (level: LogLevel, message: string, method?: string, file?: string) => void;
@@ -15,7 +15,7 @@ export class Logger {
 
     public log = (level: LogLevel, message: string, method?: string, file?: string) => {
         if (level > this.iLogger.level) { return; }
-        this.iLogger.logs.push({ level, message, method, file } as ILog);
+        this.iLogger.logs.push({ level, message, method, file });
     }
 
     public save() {
