@@ -1,12 +1,9 @@
 .DS_Store
 .idea
 .vscode
+.env
 node_modules
 npm-debug.log
-/resources/tsd
-/resources/log
-/src/config/variantConfig.ts
-tsd-debug*
-/vesta/server/*
-!/vesta/server/docker-compose.yml
-/vesta/tmp
+yarn-debug.log
+/tmp
+/build

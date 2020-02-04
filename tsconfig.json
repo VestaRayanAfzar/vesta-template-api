@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "commonjs",
-    "outDir": "vesta/server/",
+    "outDir": "build",
     "moduleResolution": "node",
     "noEmitHelpers": true,
     "sourceMap": true,

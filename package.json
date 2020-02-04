@@ -11,9 +11,10 @@
     }
   ],
   "scripts": {
-    "start": "tsc -w",
-    "deploy": "tsc",
-    "api": "gulp api"
+     "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "tear-down": "docker-compose down -v",
+    "build": "gulp build"
   },
   "repository": "https://github.com/vestaBoot/vesta-template-api.git",
   "bugs": {

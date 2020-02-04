@@ -4,7 +4,6 @@ import { Algorithm } from "jsonwebtoken";
 import { dirname } from "path";
 import { cmnConfig, ICmnConfig } from "../cmn/config";
 import { LogStorage } from "../helpers/LogFactory";
-import { IVariantConfig, variantConfig } from "./variantConfig";
 
 export interface ILogConfig {
     dir: string;
@@ -14,10 +13,9 @@ export interface ILogConfig {
 }
 
 export interface ISessionConfig {
-    database: IDatabaseConfig;
     hashing: Algorithm;
     idPrefix: string;
-    maxAge: number;
+    maxAge: number | string;
 }
 
 export interface ISecurityConfig {
@@ -26,9 +24,7 @@ export interface ISecurityConfig {
     rootRoleName: string;
     salt: string;
     secret: string;
-    session: ISessionConfig;
     userRoleName: string;
-    expireTime: number | string;
 }
 
 export interface IDirConfig {
@@ -36,13 +32,15 @@ export interface IDirConfig {
     upload: string;
 }
 
-export interface IAppConfig extends IVariantConfig, ICmnConfig {
+export interface IAppConfig extends ICmnConfig {
     database: IDatabaseConfig;
     dir: IDirConfig;
     env: string;
     log: ILogConfig;
     port: number;
+    regenerateSchema: boolean;
     security: ISecurityConfig;
+    session: ISessionConfig;
     version: {
         api: string;
         app: string;
@@ -59,7 +57,7 @@ const appConfig: IAppConfig = {
         port: +env.ADB_PORT,
         protocol: env.ADB_PROTOCOL,
         user: env.ADB_USERNAME,
-    } as IDatabaseConfig,
+    },
     dir: {
         root: dirname(__dirname),
         upload: "/upload",
@@ -75,25 +73,19 @@ const appConfig: IAppConfig = {
     },
     name: cmnConfig.name,
     port: +env.PORT,
-    regenerateSchema: variantConfig.regenerateSchema,
+    regenerateSchema: false,
     security: {
         guestRoleName: "guest",
         hashing: "sha256",
         rootRoleName: "root",
         salt: env.SALT,
         secret: env.SECRET_KEY,
-        session: {
-            database: {
-                host: env.SDB_HOST,
-                port: +env.SDB_PORT,
-                protocol: env.SDB_PROTOCOL,
-            } as IDatabaseConfig,
-            hashing: "HS256",
-            idPrefix: "sess:",
-            maxAge: 0,
-        },
         userRoleName: "user",
-        expireTime: env.JWT_EXPIRE_TIME
+    },
+    session: {
+        hashing: "HS256",
+        idPrefix: "sess:",
+        maxAge: env.JWT_EXPIRE_TIME,
     },
     version: cmnConfig.version,
 };

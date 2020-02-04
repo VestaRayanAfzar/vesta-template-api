@@ -9,7 +9,6 @@ import { JWT } from "../../../helpers/JWT";
 import { BaseController, IExtRequest } from "../../BaseController";
 
 export class AccountController extends BaseController {
-
     public route(router: Router) {
         router.get("/me", this.wrap(this.getMe));
         router.post("/account", this.checkAcl("account", "register"), this.wrap(this.register));
@@ -94,7 +93,7 @@ export class AccountController extends BaseController {
         if (sourceApp === SourceApp.EndUser && !user.isOfType(UserType.User)) {
             throw new Err(Err.Code.Forbidden, "err_none_user_login");
         }
-        const token = JWT.sign({ user: this.getUserDataForSigning(user) }, this.config.security.expireTime);
+        const token = JWT.sign({ user: this.getUserDataForSigning(user) }, this.config.session.maxAge);
         res.json({ items: [user], token });
     }
 
@@ -147,7 +146,7 @@ export class AccountController extends BaseController {
             const { items } = await User.find<IUser>(user.id, { relations: ["role"] });
             delete items[0].password;
             items[0].role = this.acl.updateRolePermissions(items[0].role as IRole);
-            const token = JWT.sign({ user: this.getUserDataForSigning(items[0]) }, this.config.security.expireTime);
+            const token = JWT.sign({ user: this.getUserDataForSigning(items[0]) }, this.config.session.maxAge);
             return res.json({ items, token });
         }
         // guest user
@@ -164,6 +163,6 @@ export class AccountController extends BaseController {
             id: user.id,
             role: user.role,
             type: user.type,
-        }
+        };
     }
 }

@@ -3,31 +3,31 @@ version: "3"
 services:
   database:
     image: mysql:5.7.22
-    restart: always
     ports:
       - "${ADB_PORT}:3306"
     volumes:
-      - /vesta/mysql:/var/lib/mysql
+      - database:/var/lib/mysql
     networks:
       - network
     environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_ROOT_PASSWORD: ${ADB_PASSWORD}
       MYSQL_DATABASE: ${ADB_NAME}
 
   api:
     image: node:alpine
-    restart: always
     ports:
       - "${PORT}:${PORT}"
+      - "9229:9229"
     volumes:
-      - ./app:/app
-      - /vesta/upload:/upload
-      - /vesta/log:/log
-      - /vesta/ssl:/ssl
+      - .:/app
+      - ./resources/ci/ssl:/ssl
+      - ./tmp/upload:/upload
+      - ./tmp/log:/log
     networks:
       - network
-    working_dir: /app
-    command: node index.js
+    working_dir: /app/tmp/server
+    command: npm run api
     environment:
       NODE_ENV: ${NODE_ENV}
       LOG_LEVEL: ${LOG_LEVEL}
@@ -43,6 +43,9 @@ services:
       JWT_EXPIRE_TIME: ${JWT_EXPIRE_TIME}
     depends_on:
       - database
+
+volumes:
+  database:
 
 networks:
   network:
