@@ -1,28 +1,28 @@
-const gulp = require('gulp');
-const path = require('path');
-const { execSync } = require('child_process');
-const server = require('gulp-develop-server');
+const gulp = require("gulp");
+const path = require("path");
+const { execSync } = require("child_process");
+const server = require("gulp-develop-server");
 
 const root = __dirname;
 
 const dir = {
     root: root,
-    build: path.join(root, 'vesta'),
-    buildServer: path.join(root, 'vesta/server'),
+    build: {
+        build: path.join(root, "build"),
+        dev: path.join(root, "tmp/server"),
+    },
 };
 
 const setting = { dir, production: false, debug: { address: null, port: 9229 } };
 
 module.exports = {
-    default: gulp.series(compileTs, watch),
-    deploy: gulp.series(production, compileTs),
-    // This tasks is called by npm script for starting api server in docker env
-    api: gulp.series(api, watch)
-}
+    default: gulp.series(compileTs, api, watch),
+    build: gulp.series(production, compileTs),
+};
 
 function api() {
     const { port } = setting.debug;
-    server.listen({ path: `${dir.buildServer}/index.js`, execArgv: [`--inspect=0.0.0.0:${port}`] });
+    server.listen({ path: `${dir.build.dev}/index.js`, execArgv: [`--inspect=0.0.0.0:${port}`] });
     return Promise.resolve();
 }
 
@@ -32,15 +32,18 @@ function reload() {
 }
 
 function compileTs() {
-    const options = setting.production ? "" : "--source-map"
+    const options = [setting.production ? "" : "--sourceMap", setting.production ? "" : `--outDir ${dir.build.dev}`];
     try {
-        execSync(`npx tsc ${options}`);
+        execSync(`npx tsc ${options.join(" ")}`);
     } catch (e) {}
     return Promise.resolve();
 }
 
 function production() {
     setting.production = true;
+    try {
+        execSync(`rm -rf ${dir.build.production}`);
+    } catch (e) {}
     return Promise.resolve();
 }
 

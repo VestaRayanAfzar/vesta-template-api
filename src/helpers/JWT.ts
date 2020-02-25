@@ -1,13 +1,13 @@
 import { sign, SignOptions, verify, VerifyCallback, VerifyOptions } from "jsonwebtoken";
 import config from "../config";
 
-const security = config.security;
+const { session, security } = config;
 
 export class JWT {
     public static sign(payload: any, expiresIn: number | string): string {
         const secretOrPrivateKey = security.secret;
         const options: SignOptions = {
-            algorithm: security.session.hashing,
+            algorithm: session.hashing,
             expiresIn,
         };
         try {
@@ -22,7 +22,7 @@ export class JWT {
     public static verify(token: string, callback: VerifyCallback) {
         const secretOrPrivateKey = security.secret;
         const options: VerifyOptions = {
-            algorithms: [security.session.hashing],
+            algorithms: [session.hashing],
             ignoreExpiration: true,
         };
         try {

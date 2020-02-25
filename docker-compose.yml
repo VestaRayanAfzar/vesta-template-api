@@ -27,7 +27,7 @@ services:
     networks:
       - network
     working_dir: /app/tmp/server
-    command: npm run api
+    command: npx gulp
     environment:
       NODE_ENV: ${NODE_ENV}
       LOG_LEVEL: ${LOG_LEVEL}

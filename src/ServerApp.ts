@@ -36,7 +36,7 @@ export class ServerApp {
 
     public async init(): Promise<void> {
         this.configExpressServer();
-        // await Session.init(this.config.security.session);
+        // await Session.init(this.config.session);
         await this.initDatabase();
         await this.initRouting();
         this.initErrorHandlers();
