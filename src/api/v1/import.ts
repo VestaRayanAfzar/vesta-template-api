@@ -6,7 +6,7 @@ import { PermissionController } from "./controller/PermissionController";
 import { RoleController } from "./controller/RoleController";
 import { SupportController } from "./controller/SupportController";
 import { UserController } from "./controller/UserController";
-/// <vesta:import/>
+// <vesta:import/>
 
 export interface IExporter {
     controller: any;
@@ -22,6 +22,6 @@ export const exporter: IExporter = {
         role: RoleController,
         support: SupportController,
         user: UserController,
-        /// <vesta:expressController/>
+        // <vesta:expressController/>
     },
 };
